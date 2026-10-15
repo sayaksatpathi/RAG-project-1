@@ -86,6 +86,30 @@ model (where dense wins on paraphrase/semantic queries) before routing could
 plausibly beat every fixed baseline. The harness and router are in place to
 re-run that comparison unchanged once a real embedder is configured.
 
+## Reliability & load (Phase 11, measured 2026-10-15)
+
+**Failure experiments** (`ragbench failure-demo`) — all 5 scenarios PASS:
+
+| Scenario | Expected behavior | Result |
+|---|---|---|
+| slow_generation_provider | answer still returned; latency reflects delay | PASS |
+| failing_generation_provider | graceful degradation (safe msg + warning) | PASS |
+| corrupt_or_unsupported_upload | rejected with ParseError, no partial index | PASS |
+| database_unavailable | fails loudly; recovers after reconnect | PASS |
+| incompatible_index_config | rejected until re-index, then recovers | PASS |
+
+**Bounded load** (`ragbench loadtest --n 200 --strategy hybrid`):
+
+- conditions: 14-doc corpus, fake embedding (d256), mock LLM, **single thread**,
+  in-process (no network).
+- throughput ≈ **1343 qps**, **0 errors**.
+- latency p50/p95/p99 = **0.71 / 0.90 / 1.34 ms**.
+
+These numbers are for the offline deterministic stack only. With a real
+embedding model and a hosted LLM, end-to-end latency would be dominated by
+embedding + generation and is NOT represented here. Do not cite these as
+production performance.
+
 ## Not yet measured (PENDING)
 
 - Answer correctness / faithfulness against reference answers (needs a judge).

@@ -77,6 +77,11 @@ def main(argv: list[str] | None = None) -> int:
     pc.add_argument("--corpus", default="evaluation/datasets/corpus")
     pc.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
     pc.add_argument("--strategy", default="hybrid", choices=["bm25", "dense", "hybrid"])
+    sub.add_parser("failure-demo", help="run controlled failure experiments")
+    pl = sub.add_parser("loadtest", help="bounded load/latency measurement")
+    pl.add_argument("--n", type=int, default=100)
+    pl.add_argument("--concurrency", type=int, default=1)
+    pl.add_argument("--strategy", default="hybrid", choices=["bm25", "dense", "hybrid"])
 
     args = parser.parse_args(argv)
     if args.cmd == "evaluate":
@@ -113,6 +118,28 @@ def main(argv: list[str] | None = None) -> int:
 
         result = calibrate_abstention(args.corpus, args.dataset, strategy=args.strategy)
         print(json.dumps(result, indent=2))
+        return 0
+    if args.cmd == "failure-demo":
+        from dataclasses import asdict
+
+        from ragbench.reliability import run_failure_experiments
+
+        results = [asdict(r) for r in run_failure_experiments()]
+        print(json.dumps(results, indent=2))
+        for r in results:
+            print(f"  {'PASS' if r['passed'] else 'FAIL'}  {r['scenario']}")
+        return 0 if all(r["passed"] for r in results) else 2
+    if args.cmd == "loadtest":
+        from ragbench.reliability import run_load
+
+        p = Pipeline()
+        if p.store.count_documents() == 0:
+            print("No documents indexed. Run `ragbench ingest evaluation/datasets/corpus` first.")
+            return 1
+        qs = ["what is reciprocal rank fusion", "what is bm25", "what is nDCG",
+              "how do embeddings work", "what causes E1042"]
+        print(json.dumps(run_load(p, qs, n=args.n, strategy=args.strategy,
+                                  concurrency=args.concurrency), indent=2))
         return 0
 
     pipeline = Pipeline()

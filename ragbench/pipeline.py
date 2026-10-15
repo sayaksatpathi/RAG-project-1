@@ -197,7 +197,20 @@ class Pipeline:
                 model=self.generator.name, index_version=iv,
             )
 
-        gen = self.generator.generate(question, results)
+        try:
+            gen = self.generator.generate(question, results)
+        except Exception as exc:  # noqa: BLE001 - controlled degradation, not a crash
+            # A generation-provider failure degrades gracefully: we return a safe
+            # answer with a warning rather than corrupting output or leaking the
+            # error. Callers/telemetry can count provider errors.
+            return Answer(
+                text="Temporarily unable to generate an answer from the retrieved "
+                     "evidence. Please retry.",
+                citations=[], retrieval_strategy=strategy,
+                retrieved_passage_ids=[r.chunk_id for r in results], abstained=False,
+                warnings=warnings + [f"generation_provider_error: {type(exc).__name__}"],
+                model=self.generator.name, index_version=iv,
+            )
         citations = validate_citations(gen.cited_passage_ids, results, iv)
         if any(not c.valid for c in citations):
             warnings.append("one or more citations failed identifier validation")

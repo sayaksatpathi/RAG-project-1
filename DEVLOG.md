@@ -144,3 +144,20 @@ dataset_version/index_version/config/metrics/report_path; CLI `index-health`,
 **Validation:** `python -m pytest` → **63 passed**; ruff clean. CLI smoke:
 `index-health` reports active vs present versions; `evaluate` registers a run;
 `runs` lists it with its git commit and index version (traceable).
+
+## 2026-10-15 — Phase 11 (reliability & performance)
+
+**Built:** graceful degradation in `Pipeline.query` (generation-provider
+exceptions → safe message + `generation_provider_error` warning, no crash);
+`ragbench/reliability` with fault-injection providers (FailingProvider,
+SlowProvider), a controlled failure-experiment runner (slow provider, failing
+provider, corrupt upload, DB unavailable, incompatible index), and a bounded
+load/latency harness (p50/p95/p99, throughput, error rate, conditions); CLI
+`failure-demo` and `loadtest`; `docs/runbook.md`.
+
+**Validation:** `python -m pytest` → **68 passed**; ruff clean.
+
+**Measured:** `failure-demo` → all 5 scenarios PASS. `loadtest --n 200 hybrid`
+→ ~1343 qps, 0 errors, p50/p95/p99 = 0.71/0.90/1.34 ms (offline, 14-doc corpus,
+fake embedding, mock LLM, single thread). Conditions stated; not a production
+claim. Recorded in docs/benchmark-results.md.

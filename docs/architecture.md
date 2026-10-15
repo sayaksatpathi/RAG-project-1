@@ -18,6 +18,7 @@ are labeled.
 | `ragbench/evaluation/` | Ranking metrics, baseline harness (B0–B4), ablation, abstention calibration. |
 | `ragbench/gate/` | Versioned quality-gate policy + candidate-vs-baseline evaluator + regression demo. |
 | `ragbench/observability/` | JSON logging (request IDs) + Prometheus metrics. |
+| `ragbench/reliability/` | Fault-injection providers, failure experiments, load harness. |
 | `apps/dashboard/` | Streamlit dashboard (playground, docs, experiments, gate, ops). |
 | `ragbench/pipeline.py` | Online query path + ingestion path orchestration. |
 | `ragbench/api/` | FastAPI app (health, query, document CRUD, metrics). |
