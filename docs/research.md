@@ -58,8 +58,29 @@ is chosen by mrr@k over B0–B3, independent of the adaptive result).
   tests are not yet computed. No composite score is reported.
 - Relevance is binary at document granularity (one chunk per doc here).
 
+## Ablations (measured)
+
+- **Remove routing** (adaptive → fixed hybrid B2): recall@5 1.000→1.000,
+  mrr@5 0.981→0.960. Routing recovers BM25-level mrr by sending lexical queries
+  to BM25; removing it costs mrr on this corpus.
+- **Remove reranking** (B3 → B2): mrr@5 0.964→0.960, ndcg@5 0.958→0.960 — the
+  reranker's effect is within noise and slightly negative on ndcg.
+- **Evidence/abstention** (threshold sweep): see docs/quality-gate.md — precision
+  stays 1.0 up to threshold 0.15, then falls; recall rises with the threshold.
+
+## Reproducibility
+
+```bash
+python -m ragbench.cli evaluate   # writes a report to evaluation/reports/ and
+                                  # registers the run (ragbench runs)
+```
+
+Every run records run_id, git commit, dataset version, index version, config,
+and metrics (see docs/traceability.md). The headline runs referenced here are
+`bf643c87` (baselines) and `e25e904b` (adaptive).
+
 ## Further work
 
 Configure a real embedding provider and re-run the identical harness; expand the
-dataset toward ~100 with graded relevance; calibrate abstention; add paired
-significance testing. See `NEXT_STEPS.md`.
+dataset toward ~100 with graded relevance; calibrate abstention on a held-out
+split; add paired significance testing. See `NEXT_STEPS.md`.

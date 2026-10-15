@@ -40,6 +40,69 @@ Last updated: 2026-10-15
 | 12 | Research report | NOT STARTED |
 | 13 | Final hardening & packaging | NOT STARTED |
 
+## Final acceptance matrix (§24)
+
+Evidence = passing tests (68 total), CLI runs this session, or an explicit status.
+
+### A. Functional application
+- [x] Upload/parse supported document — ingestion tests + demo
+- [x] Chunks retain provenance and stable IDs — `test_chunking.py`
+- [x] Sparse + dense indexes created/updated consistently — `test_retrieval.py`, pipeline
+- [x] Retrieval configuration selectable/inspectable — CLI `--strategy`, harness
+- [x] Grounded answer from retrieved evidence — `test_pipeline_api.py`, demo step 2
+- [x] Citations map to real passages — citation validation tests
+- [x] Insufficient evidence triggers abstention — demo step 3, abstention tests
+- [x] Invalid inputs / provider failures handled safely — API + reliability tests
+- [x] Deletion/re-indexing tested — `test_pipeline_api.py`, `test_traceability.py`
+
+### B. Research and evaluation
+- [x] Dataset provenance/licenses/limitations documented — `benchmark_v1.json`, research.md
+- [x] Labels support reported metrics — document-level relevance documented
+- [x] Splits/leakage controls documented — research.md (heuristic router, declared rule)
+- [x] BM25/dense/hybrid/reranked/adaptive compared — B0–B4 harness
+- [x] Retrieval metrics computed + edge cases tested — `test_metrics.py`
+- [x] Answer/evidence metrics only where supported — citation validity + abstention PRF
+- [x] Ablations included — research.md, report ablation block
+- [x] Results reproducible from commands — `ragbench evaluate`, run registry
+- [x] Negative findings reported honestly — H1 neutral, rerank negative
+
+### C. AI quality gate
+- [x] Baseline + candidate versions recorded — gate service, approved baseline
+- [x] Thresholds explicit/configurable — `evaluation/gate_policy.json`
+- [x] Deliberate regression fails the gate — `gate-demo` (B1_dense FAIL)
+- [x] Passing config can pass — `gate-demo` (B2_hybrid PASS)
+- [x] Reports explain outcome — rejection reasons in decision
+- [x] Failing candidate not promoted — CI `retrieval-gate` job
+
+### D. Backend and security
+- [x] API schemas/errors documented — pydantic models, FastAPI docs
+- [x] Write/admin endpoints protected — bearer token tests
+- [x] File validation/limits/deletion tested — parsing + API tests
+- [x] Secrets not committed/logged — `.env.example`, no raw query logging
+- [x] Prompt injection treated as input boundary — docs + untrusted-data handling
+- [x] Threat model / risks documented — docs/assumptions-and-limitations.md, security notes in README
+
+### E. DevOps and operations
+- [x] Local dev reproducible — README, demo script
+- [ ] Docker build/compose — authored; **NOT VERIFIED** (no Docker)
+- [x] CI covers core tests + quality gate — `.github/workflows/ci.yml` (hosted run NOT VERIFIED)
+- [x] Health checks behave as documented — health endpoint tests
+- [x] Telemetry real or honest empty states — `/metrics` test, dashboard empty states
+- [x] Controlled failure tested — `failure-demo` (5/5 PASS)
+- [x] Recovery/rollback tested where applicable — DB reconnect, reindex recovery
+- [ ] Kubernetes/Helm — authored, YAML-validated; **NOT VERIFIED** (no cluster)
+- [~] Terraform — fmt/init/validate **VERIFIED**; apply NOT RUN (no creds)
+
+### F. Portfolio readiness
+- [x] README reflects implementation — updated per phase
+- [x] Architecture diagrams match code — docs/architecture.md (Mermaid)
+- [x] Research results real + reproducible — docs/research.md, run registry
+- [x] Threat model, runbook, deployment, experiment protocol exist — docs/
+- [x] Demo works — `scripts/demo.sh` runs end-to-end this session
+- [x] Interview prep describes real implementation — docs/interview-preparation.md
+- [x] Resume bullets verified-only — interview-preparation.md
+- [x] Unfinished items explicit — this matrix + NEXT_STEPS.md
+
 ## Key decisions (see DECISIONS.md)
 
 - Offline-first: SQLite storage, hand-written BM25, deterministic fake embeddings, mock LLM. No paid API or heavy model needed for the core slice, tests, or retrieval-only evaluation.
