@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local data / artifacts
+*.db
+*.sqlite3
+data/*.db
+evaluation/reports/*.json
+!evaluation/reports/.gitkeep
+
+# Secrets
+.env
+.env.local
+
+# Models / caches (never commit weights)
+.cache/
+models/
+*.bin
+*.safetensors
+
+# OS
+.DS_Store
+Thumbs.db
