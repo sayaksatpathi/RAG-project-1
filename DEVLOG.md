@@ -96,3 +96,19 @@ calibration sweep (`ragbench/evaluation/calibration.py`); CLI `gate-demo` and
 - `calibrate` (hybrid): F1-optimal threshold 0.20 (P0.69/R0.73) breaches the
   gate's 0.90 precision floor; precision-safe 0.15 (P1.00/R0.47) is the current
   default and satisfies the gate. Full sweep in docs/quality-gate.md.
+
+## 2026-10-15 — Phase 8 (Docker & CI/CD)
+
+**Built:** `[build-system]` added to pyproject (editable install + `ragbench`
+console script verified); `.dockerignore`; non-root `Dockerfile` (python:3.12-
+slim, `/data` volume, HEALTHCHECK on /health/live); `docker-compose.yml` (API +
+optional pgvector profile); `.github/workflows/ci.yml` with least-privilege
+jobs: lint, test, retrieval-gate (evaluate + gate-demo), docker-build,
+dependency-scan (pip-audit); `docs/deployment.md`.
+
+**Validation:** CI and compose YAML parse OK (PyYAML). `pip install -e .` and
+`ragbench stats` work. The CI retrieval-gate commands (`ragbench evaluate
+--no-write`, `ragbench gate-demo`) are the same ones verified to pass earlier
+this session. **NOT VERIFIED:** Docker build/compose runtime (Docker
+unavailable) and the hosted GitHub Actions run (no remote) — marked honestly in
+docs/deployment.md and IMPLEMENTATION_STATUS.md.

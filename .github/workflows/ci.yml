@@ -1,0 +1,78 @@
+name: CI
+
+# Fast PR checks run offline — no paid LLM API or model downloads are required,
+# because the core path uses the deterministic fake embedding and mock provider.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least-privilege: workflow needs only to read the repository contents.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip && pip install ruff==0.17.0
+      - run: ruff check .
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - run: python -m pytest -q
+
+  retrieval-gate:
+    # The retrieval regression gate and the quality-gate demo must pass. This is
+    # the AI quality gate: a degraded candidate must be rejected (gate-demo exits
+    # non-zero if the expected FAIL/PASS outcomes are not observed).
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Retrieval benchmark (offline)
+        run: python -m ragbench.cli evaluate --no-write
+      - name: Quality gate regression demo
+        run: python -m ragbench.cli gate-demo
+
+  docker-build:
+    # Build the image to catch Dockerfile breakage. Does not push anywhere.
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t ragbench:ci .
+
+  dependency-scan:
+    # Dependency vulnerability scan. A clean scan is NOT proof of security; it
+    # only covers known advisories for declared dependencies.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip && pip install pip-audit==2.7.3
+      - name: Audit declared dependencies
+        run: pip-audit --strict --progress-spinner off .

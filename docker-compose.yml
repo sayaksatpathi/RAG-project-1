@@ -1,0 +1,54 @@
+# Local RAGBench stack. Default profile runs only the API with the offline
+# providers and a persisted SQLite volume. The optional "postgres" profile
+# starts a Postgres+pgvector service for the (unverified) Postgres backend.
+#
+# Usage:
+#   docker compose up --build            # API only (offline defaults)
+#   docker compose --profile postgres up # also start Postgres+pgvector
+#
+# NOT VERIFIED in the dev environment (Docker unavailable). See docs/deployment.md.
+
+services:
+  api:
+    build: .
+    image: ragbench:local
+    ports:
+      - "8000:8000"
+    environment:
+      RAGBENCH_STORAGE: sqlite
+      RAGBENCH_SQLITE_PATH: /data/ragbench.db
+      RAGBENCH_EMBEDDING_PROVIDER: fake
+      RAGBENCH_LLM_PROVIDER: mock
+      # Override the development token in any real deployment.
+      RAGBENCH_API_TOKEN: ${RAGBENCH_API_TOKEN:-dev-local-token}
+    volumes:
+      - ragbench_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready').status==200 else 1)"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  # Optional: Postgres with pgvector for the alternative storage backend.
+  postgres:
+    image: pgvector/pgvector:pg16
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_USER: ragbench
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ragbench}
+      POSTGRES_DB: ragbench
+    ports:
+      - "5432:5432"
+    volumes:
+      - ragbench_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ragbench"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ragbench_data:
+  ragbench_pg:
