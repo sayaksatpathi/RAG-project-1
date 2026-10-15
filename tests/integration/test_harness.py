@@ -9,9 +9,25 @@ DATASET = "evaluation/datasets/benchmark_v1.json"
 def test_harness_runs_all_baselines():
     report = run_benchmark(CORPUS, DATASET, k=5)
     names = [b["name"] for b in report["baselines"]]
-    assert names == ["B0_bm25", "B1_dense", "B2_hybrid", "B3_hybrid_rerank"]
+    assert names == ["B0_bm25", "B1_dense", "B2_hybrid", "B3_hybrid_rerank", "B4_adaptive"]
     assert report["num_cases"] == 50
     assert report["git_commit"]  # populated or 'unknown'
+
+
+def test_adaptive_reports_routing_and_ablation():
+    report = run_benchmark(CORPUS, DATASET, k=5)
+    b4 = next(b for b in report["baselines"] if b["name"] == "B4_adaptive")
+    routing = b4["routing"]
+    # Every case routed somewhere; distribution counts sum to num_cases.
+    assert sum(routing["distribution"].values()) == report["num_cases"]
+    assert 0.0 <= routing["fallback_rate"] <= 1.0
+    abl = report["ablation"]
+    assert abl["strongest_fixed_baseline"] in {
+        "B0_bm25", "B1_dense", "B2_hybrid", "B3_hybrid_rerank"
+    }
+    assert set(abl["adaptive_vs_strongest_fixed_delta"]) == {
+        "recall@5", "mrr@5", "ndcg@5", "hit@5"
+    }
 
 
 def test_harness_metrics_present_and_bounded():

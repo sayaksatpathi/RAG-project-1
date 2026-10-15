@@ -34,6 +34,7 @@ class Pipeline:
         self.embedder = build_embedding_provider(self.config)
         self.generator = build_generation_provider(self.config)
         self._retriever: HybridRetriever | None = None
+        self._router = None
         self._dirty = True
 
     # --- ingestion -------------------------------------------------------
@@ -98,12 +99,24 @@ class Pipeline:
             bm25=bm25, dense=dense, embedder=self.embedder, texts=texts, doc_of=doc_of,
             index_version=iv, rrf_k=self.config.rrf_k,
         )
+        self._router = None  # rebuilt against the fresh index on next route()
         self._dirty = False
         return self._retriever
 
     def retrieve(self, query: str, strategy: str = "hybrid", top_k: int | None = None):
         retriever = self._ensure_retriever()
+        if strategy == "adaptive":
+            strategy = self.route(query).strategy
         return retriever.retrieve(query, strategy, top_k or self.config.top_k)
+
+    def route(self, query: str):
+        """Return the router's decision for a query (builds router on demand)."""
+        from ragbench.routing import InterpretableRouter
+
+        retriever = self._ensure_retriever()
+        if self._router is None:
+            self._router = InterpretableRouter(retriever.bm25)
+        return self._router.route(query)
 
     # --- online query path ----------------------------------------------
     def query(self, question: str, strategy: str = "hybrid", top_k: int | None = None) -> Answer:

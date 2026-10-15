@@ -57,6 +57,35 @@ Clearly out-of-corpus categories (`unanswerable`) abstain well; `direct_fact`
 answers well; `misleading_overlap` is the known weak spot. See the JSON report
 for exact per-category figures for every baseline.
 
+## Phase 3 run — adaptive routing (recorded 2026-10-15)
+
+- run_id: `e25e904b-87c9-40e1-9dfb-d3e7b5fb53d8`, git_commit `a14cc13`, same dataset/config.
+
+| Baseline | recall@5 | mrr@5 | ndcg@5 | hit@5 | abstain P | abstain R |
+|---|---|---|---|---|---|---|
+| B0 BM25 | 1.000 | 0.981 | 0.979 | 1.000 | 1.000 | 0.533 |
+| B1 dense | 0.929 | 0.901 | 0.885 | 0.971 | 1.000 | 0.467 |
+| B2 hybrid | 1.000 | 0.960 | 0.960 | 1.000 | 1.000 | 0.467 |
+| B3 hybrid+rerank | 0.986 | 0.964 | 0.958 | 1.000 | 1.000 | 0.400 |
+| **B4 adaptive** | 1.000 | 0.981 | 0.979 | 1.000 | 1.000 | 0.533 |
+
+- **Routing distribution:** bm25 = 45, hybrid = 4, dense = 1. **Fallback rate: 0.08.**
+- **Ablation — adaptive vs strongest fixed (B0 BM25, chosen by mrr@5):** delta
+  **+0.000 on every metric**. Removing routing is equivalent to B2 hybrid;
+  removing reranking is B3 vs B2 (B3 is slightly worse).
+
+### Finding (H1 for this setup)
+
+**Adaptive routing did NOT improve over the strongest fixed baseline — it tied
+it.** The interpretable router correctly recognizes that lexical signals
+dominate on this corpus (45/50 queries → BM25) and therefore reproduces BM25's
+results. This is a clean neutral result, reported as-is. The caveat is central:
+the deterministic fake embedding makes dense retrieval weak, so there is little
+headroom for a router to exploit. The experiment would need a real embedding
+model (where dense wins on paraphrase/semantic queries) before routing could
+plausibly beat every fixed baseline. The harness and router are in place to
+re-run that comparison unchanged once a real embedder is configured.
+
 ## Not yet measured (PENDING)
 
 - Answer correctness / faithfulness against reference answers (needs a judge).

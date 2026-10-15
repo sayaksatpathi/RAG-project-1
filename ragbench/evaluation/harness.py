@@ -40,6 +40,7 @@ BASELINES = [
     ("B1_dense", "dense", False),
     ("B2_hybrid", "hybrid", False),
     ("B3_hybrid_rerank", "hybrid", True),
+    ("B4_adaptive", "adaptive", False),
 ]
 
 
@@ -105,13 +106,27 @@ class Harness:
                 doc = self.pipeline.ingest_bytes(f.read_bytes(), f.name, f.suffix)
                 self.key_to_doc[f.stem] = doc.id
 
-    def _ranked_docs(self, question: str, strategy: str, reranked: bool) -> list[RetrievalResult]:
+    def _ranked_docs(
+        self, question: str, strategy: str, reranked: bool
+    ) -> tuple[list[RetrievalResult], str, bool]:
+        """Return (results, effective_strategy, was_fallback).
+
+        For the adaptive strategy, the router picks the effective strategy and
+        reports whether it used its fallback; fixed strategies pass through.
+        """
         retriever = self.pipeline._ensure_retriever()
         pool = max(self.eval_config.k * 4, 20)
-        results = retriever.retrieve(question, strategy, pool)
+        fallback = False
+        if strategy == "adaptive":
+            decision = self.pipeline.route(question)
+            effective = decision.strategy
+            fallback = decision.fallback
+        else:
+            effective = strategy
+        results = retriever.retrieve(question, effective, pool)
         if reranked:
             results = self.reranker(question, results)
-        return results
+        return results, effective, fallback
 
     def _doc_ranking(self, results: list[RetrievalResult]) -> list[str]:
         seen: set[str] = set()
@@ -130,10 +145,17 @@ class Harness:
 
         for name, strategy, reranked in BASELINES:
             per_case = []
+            routing_counts: dict[str, int] = {}
+            fallback_n = 0
             for case in cases:
                 relevant = {self.key_to_doc[key] for key in case.relevant_doc_keys
                             if key in self.key_to_doc}
-                results = self._ranked_docs(case.question, strategy, reranked)
+                results, effective, fallback = self._ranked_docs(
+                    case.question, strategy, reranked
+                )
+                if strategy == "adaptive":
+                    routing_counts[effective] = routing_counts.get(effective, 0) + 1
+                    fallback_n += int(fallback)
                 doc_ranking = self._doc_ranking(results)
                 # Abstention consistent with the production pipeline logic.
                 evidence = self.pipeline._evidence_score(case.question, results)
@@ -147,9 +169,16 @@ class Harness:
                     "abstained": abstained,
                     "expected_abstention": case.expected_abstention,
                 })
-            report_baselines.append(
-                self._summarize(name, strategy, reranked, per_case, k)
-            )
+            summary = self._summarize(name, strategy, reranked, per_case, k)
+            if strategy == "adaptive":
+                summary["routing"] = {
+                    "distribution": routing_counts,
+                    "fallback_rate": round(fallback_n / len(cases), 4) if cases else None,
+                }
+            report_baselines.append(summary)
+
+        report_baselines_by_name = {b["name"]: b for b in report_baselines}
+        ablation = self._ablation(report_baselines_by_name, k)
 
         return {
             "run_id": str(uuid.uuid4()),
@@ -167,6 +196,38 @@ class Harness:
                 "reranker": self.reranker.name,
             },
             "baselines": report_baselines,
+            "ablation": ablation,
+        }
+
+    def _ablation(self, by_name: dict, k: int) -> dict:
+        """Compare the adaptive method against the strongest fixed baseline and
+        record the effect of removing routing and reranking.
+
+        "Strongest fixed" is chosen by mrr@k among the fixed baselines (B0-B3),
+        declared before looking at the adaptive result to avoid cherry-picking.
+        """
+        fixed = ["B0_bm25", "B1_dense", "B2_hybrid", "B3_hybrid_rerank"]
+        metric = f"mrr@{k}"
+
+        def m(name: str, key: str):
+            return by_name[name]["aggregate"].get(key)
+
+        best_fixed = max(fixed, key=lambda n: (m(n, metric) or -1.0))
+        adaptive = "B4_adaptive"
+        keys = [f"recall@{k}", f"mrr@{k}", f"ndcg@{k}", f"hit@{k}"]
+        deltas = {}
+        for key in keys:
+            a, b = m(adaptive, key), m(best_fixed, key)
+            deltas[key] = (
+                round(a - b, 4) if (a is not None and b is not None) else None
+            )
+        return {
+            "strongest_fixed_baseline": best_fixed,
+            "selection_metric": metric,
+            "adaptive_vs_strongest_fixed_delta": deltas,
+            "remove_routing_equivalent": "B2_hybrid",
+            "remove_reranking_pair": ["B3_hybrid_rerank", "B2_hybrid"],
+            "note": "Positive delta = adaptive beat the strongest fixed baseline on that metric.",
         }
 
     @staticmethod
@@ -257,6 +318,26 @@ def render_markdown(report: dict) -> str:
             f"{fmt(a[f'ndcg@{k}'])} | {fmt(a[f'hit@{k}'])} | "
             f"{fmt(ab['precision'])} | {fmt(ab['recall'])} |"
         )
+    # Routing distribution for the adaptive baseline.
+    adaptive = next((b for b in report["baselines"] if b["name"] == "B4_adaptive"), None)
+    if adaptive and "routing" in adaptive:
+        r = adaptive["routing"]
+        dist = ", ".join(f"{s}={n}" for s, n in sorted(r["distribution"].items()))
+        lines += ["", "## Adaptive routing",
+                  f"- decision distribution: {dist}",
+                  f"- fallback rate: {fmt(r['fallback_rate'])}"]
+
+    abl = report.get("ablation")
+    if abl:
+        lines += ["", "## Ablation: adaptive vs strongest fixed baseline",
+                  f"- strongest fixed (by {abl['selection_metric']}): "
+                  f"**{abl['strongest_fixed_baseline']}**",
+                  "- adaptive minus strongest-fixed deltas (positive = adaptive wins):"]
+        for key, d in abl["adaptive_vs_strongest_fixed_delta"].items():
+            lines.append(f"  - {key}: {('n/a' if d is None else f'{d:+.3f}')}")
+        lines.append("- remove-routing ablation = B2_hybrid; "
+                     "remove-reranking pair = B3 vs B2 (see table).")
+
     lines += ["", "## Notes",
               "- Metrics are at document relevance granularity (see dataset provenance).",
               "- Cases without relevance labels (unanswerable/ambiguous/etc.) are excluded "

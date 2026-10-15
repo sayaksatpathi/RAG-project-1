@@ -32,3 +32,13 @@ business logic. This is the deterministic test seam the brief requires.
 
 BM25 and cosine scores are never compared as calibrated probabilities. Hybrid
 retrieval fuses *ranks* via Reciprocal Rank Fusion (RRF), not raw scores.
+
+## ADR-0004: Router is an interpretable heuristic, not a trained model (2026-10-15)
+
+The adaptive router (`ragbench/routing`) is a hand-specified ordered rule set
+over interpretable query features (exact identifier, corpus-relative term
+rarity, length, paraphrase style) with a fixed-hybrid fallback. It is explicitly
+NOT called a trained model. A learned router is a documented future extension
+and would require larger labeled data to be honest. The fallback guarantees the
+service is never less reliable than the hybrid baseline when the router is
+uncertain or errors.

@@ -57,3 +57,22 @@ fake-embedding setup (recall@5 1.000); dense weakest (0.929); hybrid matches
 BM25 recall; the heuristic reranker slightly *reduced* mrr/ndcg vs BM25.
 Abstention precision 1.000 but recall only 0.40–0.53 (misleading-overlap cases
 leak) — threshold calibration deferred to Phase 4.
+
+## 2026-10-15 — Phase 3 (adaptive routing experiment)
+
+**Built:** interpretable router (`ragbench/routing`) with ordered rules
+(exact-identifier/rare-term → bm25; long paraphrase question → dense; else
+hybrid fallback) adapting rarity to the live BM25 doc-frequencies; `adaptive`
+strategy wired into the pipeline; harness baseline B4 with routing-distribution
+and fallback-rate reporting; a pre-declared ablation comparing adaptive vs the
+strongest fixed baseline (chosen by mrr@k) and noting remove-routing /
+remove-rerank equivalents.
+
+**Validation:** `python -m pytest` → **45 passed**; ruff clean. Run `e25e904b`.
+
+**Measured finding (H1 neutral):** adaptive routed 45/50 queries to BM25 (4
+hybrid fallback, 1 dense; fallback rate 0.08) and **tied** the strongest fixed
+baseline BM25 exactly (+0.000 on all metrics). On this corpus lexical retrieval
+dominates, so routing reproduces BM25 rather than beating it; the dominant
+caveat is the non-semantic fake embedding. Recorded honestly in
+docs/research.md and docs/benchmark-results.md.
