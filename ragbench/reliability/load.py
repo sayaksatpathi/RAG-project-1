@@ -32,6 +32,9 @@ def run_load(
 ) -> dict:
     if not queries:
         raise ValueError("queries must be non-empty")
+    # Warm up the in-memory index once up front so concurrent workers do not race
+    # on the lazy first build (and so measured latency reflects steady state).
+    pipeline._ensure_retriever()
     plan = [queries[i % len(queries)] for i in range(n)]
     latencies: list[float] = []
     errors = 0

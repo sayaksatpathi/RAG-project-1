@@ -77,7 +77,9 @@ python -m ragbench.cli evaluate   # writes a report to evaluation/reports/ and
 
 Every run records run_id, git commit, dataset version, index version, config,
 and metrics (see docs/traceability.md). The headline runs referenced here are
-`bf643c87` (baselines) and `e25e904b` (adaptive).
+`bf643c87` (baselines, v1/50 cases), `e25e904b` (adaptive, v1), and `879ec810`
+(v1.1/100 cases with graded nDCG). The neutral H1 result (adaptive ties the
+strongest fixed baseline) holds on both dataset versions.
 
 ## Further work
 

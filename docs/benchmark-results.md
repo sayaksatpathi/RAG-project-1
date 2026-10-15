@@ -86,6 +86,30 @@ model (where dense wins on paraphrase/semantic queries) before routing could
 plausibly beat every fixed baseline. The harness and router are in place to
 re-run that comparison unchanged once a real embedder is configured.
 
+## v1.1 run — 100 cases, graded nDCG (measured 2026-10-15)
+
+Dataset expanded to **100 cases** (`dataset_version: v1.1`) with optional graded
+relevance (primary doc grade 3, supporting grade 1) on multi-passage cases, so
+nDCG is now graded rather than binary. run_id `879ec810`, git_commit `0e3b130`.
+
+| Baseline | recall@5 | mrr@5 | ndcg@5 | hit@5 | abstain P | abstain R |
+|---|---|---|---|---|---|---|
+| B0 BM25 | 0.986 | 0.955 | 0.953 | 1.000 | 0.944 | 0.548 |
+| B1 dense | 0.920 | 0.843 | 0.843 | 0.957 | 0.938 | 0.484 |
+| B2 hybrid | 0.971 | 0.931 | 0.926 | 0.986 | 0.941 | 0.516 |
+| B3 hybrid+rerank | 0.964 | 0.949 | 0.938 | 0.986 | 0.933 | 0.452 |
+| **B4 adaptive** | 0.986 | 0.955 | 0.953 | 1.000 | 0.944 | 0.548 |
+
+- Routing: bm25=91, hybrid=8, dense=1; fallback rate 0.08.
+- Adaptive vs strongest fixed (B0): **+0.000 on all metrics** — the v1 neutral
+  H1 result holds at 100 cases.
+- The story is unchanged from v1: BM25 strongest, dense weakest, rerank slightly
+  negative on recall/ndcg. nDCG now reflects graded relevance (it sits at or
+  below recall because the graded multi-passage cases penalize putting a
+  supporting doc above the primary one).
+- Abstention precision is now 0.944 (a few answerable questions abstain with the
+  larger set) — still above the gate's 0.90 floor; recall ~0.55.
+
 ## Reliability & load (Phase 11, measured 2026-10-15)
 
 **Failure experiments** (`ragbench failure-demo`) — all 5 scenarios PASS:

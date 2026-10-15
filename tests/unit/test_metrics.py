@@ -61,6 +61,16 @@ def test_ndcg_graded():
     assert 0 < val < 1
 
 
+def test_ndcg_graded_differs_from_binary():
+    # Same ranking, same relevant set, but graded relevance penalizes putting the
+    # low-grade doc first more than binary does.
+    ranking, rel = ["b", "a"], {"a", "b"}
+    binary = ndcg_at_k(ranking, rel, 2)
+    graded = ndcg_at_k(ranking, rel, 2, grades={"a": 3.0, "b": 1.0})
+    assert binary == 1.0  # both relevant, binary gains equal -> perfect
+    assert graded < binary  # graded is sensitive to the primary doc's position
+
+
 def test_mean_ignoring_none():
     assert mean_ignoring_none([1.0, None, 0.0]) == 0.5
     assert mean_ignoring_none([None, None]) is None

@@ -59,8 +59,9 @@ Evidence = passing tests (68 total), CLI runs this session, or an explicit statu
 - [x] Dataset provenance/licenses/limitations documented — `benchmark_v1.json`, research.md
 - [x] Labels support reported metrics — document-level relevance documented
 - [x] Splits/leakage controls documented — research.md (heuristic router, declared rule)
-- [x] BM25/dense/hybrid/reranked/adaptive compared — B0–B4 harness
-- [x] Retrieval metrics computed + edge cases tested — `test_metrics.py`
+- [x] BM25/dense/hybrid/reranked/adaptive compared — B0–B4 harness (v1.1, 100 cases)
+- [x] Retrieval metrics computed + edge cases tested — `test_metrics.py` (incl. graded nDCG)
+- [x] Graded relevance exercises nDCG beyond binary — v1.1 `relevance_grades`
 - [x] Answer/evidence metrics only where supported — citation validity + abstention PRF
 - [x] Ablations included — research.md, report ablation block
 - [x] Results reproducible from commands — `ragbench evaluate`, run registry

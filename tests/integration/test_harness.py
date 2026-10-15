@@ -10,7 +10,7 @@ def test_harness_runs_all_baselines():
     report = run_benchmark(CORPUS, DATASET, k=5)
     names = [b["name"] for b in report["baselines"]]
     assert names == ["B0_bm25", "B1_dense", "B2_hybrid", "B3_hybrid_rerank", "B4_adaptive"]
-    assert report["num_cases"] == 50
+    assert report["num_cases"] == 100
     assert report["git_commit"]  # populated or 'unknown'
 
 

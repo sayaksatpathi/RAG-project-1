@@ -188,6 +188,24 @@ already-present httpx, a bounded timeout, and bounded transient-only retries.
 Also fixed the pipeline to size the dense index from the embedder's actual
 dimension rather than the config value. 73 tests pass; ruff clean.
 
+## 2026-10-15 — Benchmark expanded to 100 cases + graded nDCG
+
+Expanded `benchmark_v1.json` to **100 cases** (`dataset_version: v1.1`) across
+the same 8 categories, and added optional graded relevance
+(`relevance_grades: {doc_key: grade}`, primary 3 / supporting 1) on multi-passage
+cases. Wired grades through `BenchmarkCase`/`load_dataset`/the harness into
+`ndcg_at_k` so nDCG is graded where labels provide it (binary elsewhere).
+
+Also warmed the retriever in `run_load` before concurrent workers, fixing a
+genuine race (threads building the lazy index simultaneously caused intermittent
+load errors); after warm-up, queries are pure in-memory and the concurrency test
+is stable across repeats.
+
+**Validation:** 74 tests pass; ruff clean; new graded-nDCG unit test proves
+graded ≠ binary. Fresh run `879ec810` (v1.1, 100 cases) recorded in
+docs/benchmark-results.md — the neutral H1 result holds; BM25 remains strongest;
+abstention precision 0.944 (still above the gate's 0.90 floor).
+
 ## 2026-10-15 — Phase 10 (Terraform & cloud readiness)
 
 **Built:** `infrastructure/terraform/` — minimal opt-in AWS IaC: ECR repo

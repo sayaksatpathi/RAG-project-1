@@ -52,6 +52,9 @@ class BenchmarkCase:
     answerable: bool
     relevant_doc_keys: list[str]
     expected_abstention: bool
+    # Optional graded relevance {doc_key: grade}; keys without a grade default
+    # to 1 (binary). Used for graded nDCG.
+    relevance_grades: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -86,6 +89,7 @@ def load_dataset(path: str) -> tuple[dict, list[BenchmarkCase]]:
             id=c["id"], question=c["question"], category=c["category"],
             answerable=c["answerable"], relevant_doc_keys=c["relevant_doc_keys"],
             expected_abstention=c["expected_abstention"],
+            relevance_grades=c.get("relevance_grades", {}),
         )
         for c in data["cases"]
     ]
@@ -150,6 +154,11 @@ class Harness:
             for case in cases:
                 relevant = {self.key_to_doc[key] for key in case.relevant_doc_keys
                             if key in self.key_to_doc}
+                # Graded relevance by document id: explicit grade or default 1.
+                grades = {
+                    self.key_to_doc[key]: float(case.relevance_grades.get(key, 1))
+                    for key in case.relevant_doc_keys if key in self.key_to_doc
+                }
                 results, effective, fallback = self._ranked_docs(
                     case.question, strategy, reranked
                 )
@@ -164,7 +173,7 @@ class Harness:
                     "id": case.id, "category": case.category,
                     "recall": recall_at_k(doc_ranking, relevant, k),
                     "mrr": mrr_at_k(doc_ranking, relevant, k),
-                    "ndcg": ndcg_at_k(doc_ranking, relevant, k),
+                    "ndcg": ndcg_at_k(doc_ranking, relevant, k, grades=grades),
                     "hit": hit_at_k(doc_ranking, relevant, k),
                     "abstained": abstained,
                     "expected_abstention": case.expected_abstention,
