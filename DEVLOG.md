@@ -175,3 +175,19 @@ scaling documented as requiring the Postgres backend (no false HA claim).
 PyYAML. **NOT VERIFIED:** no cluster/kubectl/helm available — `helm lint`,
 `helm template`, and `kubectl apply` not run. Exact verification commands and
 the NOT VERIFIED status are in docs/deployment.md and IMPLEMENTATION_STATUS.md.
+
+## 2026-10-15 — Phase 10 (Terraform & cloud readiness)
+
+**Built:** `infrastructure/terraform/` — minimal opt-in AWS IaC: ECR repo
+(scan-on-push, keep-5 lifecycle) + CloudWatch log group always; an opt-in ECS
+Fargate service (`enable_service` default false) that is private by default
+(`assign_public_ip=false`, ingress only via explicit `ingress_cidrs`); IAM task
+execution role (AWS-managed least-priv policy); region a required variable;
+outputs, tfvars example, and a README with resource inventory, cost, teardown,
+and exposure notes.
+
+**Validation (actually run):** `terraform fmt` → clean; `terraform init
+-backend=false` → success (provider downloaded); `terraform validate` →
+**"the configuration is valid."** `plan`/`apply` NOT RUN — no AWS credentials and
+apply would create billable resources (not authorized). `.gitignore` updated to
+exclude `.terraform/`, state, and tfvars (lock file kept).

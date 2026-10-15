@@ -29,3 +29,11 @@ models/
 # OS
 .DS_Store
 Thumbs.db
+
+# Terraform (keep the lock file; ignore provider cache, state, and tfvars)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+

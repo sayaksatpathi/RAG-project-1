@@ -1,21 +1,19 @@
 # Next Steps (resume here)
 
 ## Immediately executable
-1. **Phase 10 — Terraform:** opt-in, minimal, cost-aware IaC; `terraform
-   validate`/`fmt` only (no creds); document teardown and public-exposure
-   avoidance.
-2. **Phase 12/13 — report & packaging:** finalize docs/research.md; add
+1. **Phase 12/13 — report & packaging:** finalize docs/research.md; add
    docs/interview-preparation.md; review the §24 acceptance matrix; truthful
-   resume bullets.
-3. **Verify where a runtime exists:** Docker build + `compose up`; GitHub Actions
-   run; `helm lint`/`kubectl apply` on a local cluster; live Grafana/Streamlit;
-   real embedding provider re-run of harness + calibrate.
+   resume bullets; final README pass.
+2. **Verify where a runtime exists:** Docker build + `compose up`; GitHub Actions
+   run; `helm lint`/`kubectl apply` on a local cluster; `terraform plan`/`apply`
+   with real AWS creds; live Grafana/Streamlit; real embedding provider re-run.
 
 ## Done since last checkpoint
-- Phases 1–5, 7, 8, 9, 11 covered. 1–5 & 11 VERIFIED; 7, 8, 9 authored/PARTIAL
-  (Docker/compose, hosted CI, K8s/Helm, live Grafana/Streamlit NOT VERIFIED — no
-  runtime). 68 tests pass. Docs in docs/{research,benchmark-results,quality-gate,
-  deployment,observability,traceability,runbook}.md.
+- Phases 1–5, 7–11 covered. 1–5 & 11 VERIFIED; 10 config-validated (fmt/init/
+  validate pass, apply not run); 7, 8, 9 authored/PARTIAL (Docker/compose, hosted
+  CI, K8s/Helm, live Grafana/Streamlit NOT VERIFIED — no runtime). 68 tests pass.
+  Docs in docs/{research,benchmark-results,quality-gate,deployment,observability,
+  traceability,runbook}.md + infrastructure/terraform/README.md.
 
 ## Deferred / blocked (environment)
 - Docker Compose, Kubernetes/Helm: authored but NOT VERIFIED (no runtime).

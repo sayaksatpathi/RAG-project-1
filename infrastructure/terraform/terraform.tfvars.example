@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars and edit. aws_region is required (no default).
+aws_region = "us-east-1"
+
+# Cheap resources (ECR + logs) are always created. The ECS Fargate service is
+# opt-in and incurs ongoing cost; leave false unless you intend to run it.
+enable_service = false
+
+# No public ingress by default. To expose the service, set specific CIDRs
+# (never 0.0.0.0/0 unless you really mean it).
+# ingress_cidrs = ["203.0.113.4/32"]

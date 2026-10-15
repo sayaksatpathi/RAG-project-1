@@ -8,7 +8,7 @@
 | Docker image / Compose | **NOT VERIFIED** — authored and YAML-validated; Docker is unavailable in the dev environment, so the image has not been built or run. |
 | GitHub Actions CI | **NOT VERIFIED on GitHub** — workflow YAML is valid and its offline steps (`evaluate`, `gate-demo`, `pytest`, `ruff`) are verified locally; the hosted run has not executed (no remote). |
 | Kubernetes / Helm | **AUTHORED, NOT VERIFIED** — manifests + Helm chart written; plain manifest YAML and chart metadata validate with PyYAML; no cluster/kubectl/helm available to apply, lint, or render. |
-| Terraform / cloud | NOT STARTED. |
+| Terraform / cloud | **CONFIG VALIDATED, NOT DEPLOYED** — `terraform fmt`/`init`/`validate` pass; `plan`/`apply` not run (no credentials, would reach AWS). |
 
 ## Local (verified)
 
@@ -69,6 +69,18 @@ environment, so `helm lint`/`template` and `kubectl apply` have not been run.
 The plain-YAML manifests and the chart's `Chart.yaml`/`values.yaml` parse
 cleanly; the Go-templated files are unrendered. If `readOnlyRootFilesystem`
 causes a write error at runtime, mount an `emptyDir` at `/tmp`.
+
+## Terraform / AWS (opt-in, config validated)
+
+`infrastructure/terraform/` provisions a minimal, cost-aware AWS setup: an ECR
+repository and a CloudWatch log group (cheap, always), plus an **opt-in** ECS
+Fargate service (`enable_service`, default false) that is private by default
+(`assign_public_ip=false`, no ingress unless `ingress_cidrs` is set). Region is a
+required variable. `terraform fmt`, `init -backend=false`, and `validate` all
+pass (VERIFIED 2026-10-15); `plan`/`apply` are **not run** (no credentials, and
+apply would create billable resources — do not apply without authorization). See
+`infrastructure/terraform/README.md` for resource inventory, cost, teardown, and
+exposure notes.
 
 ## CI (GitHub Actions)
 
