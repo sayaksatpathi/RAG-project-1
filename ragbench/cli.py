@@ -66,6 +66,13 @@ def main(argv: list[str] | None = None) -> int:
     pe.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
     pe.add_argument("--k", type=int, default=5)
     pe.add_argument("--no-write", action="store_true", help="print only, do not save a report")
+    pg = sub.add_parser("gate-demo", help="demonstrate the quality gate rejecting a regression")
+    pg.add_argument("--corpus", default="evaluation/datasets/corpus")
+    pg.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
+    pc = sub.add_parser("calibrate", help="sweep the abstention threshold")
+    pc.add_argument("--corpus", default="evaluation/datasets/corpus")
+    pc.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
+    pc.add_argument("--strategy", default="hybrid", choices=["bm25", "dense", "hybrid"])
 
     args = parser.parse_args(argv)
     if args.cmd == "evaluate":
@@ -77,6 +84,24 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_write:
             json_path, md_path = write_report(report)
             print(f"wrote {json_path}\nwrote {md_path}")
+        return 0
+    if args.cmd == "gate-demo":
+        from ragbench.gate.service import regression_demo
+
+        result = regression_demo(args.corpus, args.dataset)
+        deg = result["degraded_candidate"]
+        heal = result["healthy_candidate"]
+        print(json.dumps(result, indent=2))
+        print(f"\ndegraded candidate ({deg['candidate_strategy']}): {deg['decision']}")
+        print(f"healthy candidate  ({heal['candidate_strategy']}): {heal['decision']}")
+        # Exit non-zero only if the demo itself is broken (expected FAIL/PASS flipped).
+        ok = deg["decision"] == "FAIL" and heal["decision"] == "PASS"
+        return 0 if ok else 2
+    if args.cmd == "calibrate":
+        from ragbench.evaluation.calibration import calibrate_abstention
+
+        result = calibrate_abstention(args.corpus, args.dataset, strategy=args.strategy)
+        print(json.dumps(result, indent=2))
         return 0
 
     pipeline = Pipeline()

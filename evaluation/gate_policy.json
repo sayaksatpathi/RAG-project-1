@@ -1,0 +1,14 @@
+{
+  "policy_version": "1.0.0",
+  "description": "Quality-gate thresholds for promoting a candidate RAG configuration against an approved baseline. Hard gates must all pass; warning metrics are reported but do not block. Regression tolerances are intentionally generous to absorb small-dataset variance on the 50-case benchmark; tighten them as the dataset grows.",
+  "k": 5,
+  "hard_gates": {
+    "recall@5": {"type": "regression", "max_drop": 0.03, "comment": "candidate recall may not fall more than 0.03 below baseline"},
+    "mrr@5": {"type": "regression", "max_drop": 0.05},
+    "ndcg@5": {"type": "min_absolute", "min": 0.50},
+    "abstention.precision": {"type": "min_absolute", "min": 0.90, "comment": "must not start abstaining on answerable questions"}
+  },
+  "warning_metrics": {
+    "abstention.recall": {"type": "min_absolute", "min": 0.60, "comment": "known weak spot; warning only until calibrated"}
+  }
+}

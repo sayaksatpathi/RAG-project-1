@@ -15,7 +15,8 @@ are labeled.
 | `ragbench/generation/` | Generation Protocol, mock provider, citation validation. |
 | `ragbench/reranking/` | Reranker interface + deterministic heuristic stand-in. |
 | `ragbench/routing/` | Interpretable query-aware router with hybrid fallback. |
-| `ragbench/evaluation/` | Ranking metrics + reproducible baseline harness (B0–B4) + ablation. |
+| `ragbench/evaluation/` | Ranking metrics, baseline harness (B0–B4), ablation, abstention calibration. |
+| `ragbench/gate/` | Versioned quality-gate policy + candidate-vs-baseline evaluator + regression demo. |
 | `ragbench/pipeline.py` | Online query path + ingestion path orchestration. |
 | `ragbench/api/` | FastAPI app (health, query, document CRUD, metrics). |
 | `ragbench/cli.py` | `ingest` / `query` / `stats`. |

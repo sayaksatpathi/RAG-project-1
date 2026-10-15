@@ -76,3 +76,23 @@ baseline BM25 exactly (+0.000 on all metrics). On this corpus lexical retrieval
 dominates, so routing reproduces BM25 rather than beating it; the dominant
 caveat is the non-semantic fake embedding. Recorded honestly in
 docs/research.md and docs/benchmark-results.md.
+
+## 2026-10-15 — Phase 4 (evidence controls & evaluation gate)
+
+**Built:** versioned gate policy (`evaluation/gate_policy.json`); a gate
+evaluator (`ragbench/gate/policy.py`) with regression and min_absolute
+constraints, machine-readable decision + reasons, fail-closed on missing
+metrics; a gate service (`ragbench/gate/service.py`) to pin an approved
+baseline, check a candidate, and run a deliberate-regression demo; abstention
+calibration sweep (`ragbench/evaluation/calibration.py`); CLI `gate-demo` and
+`calibrate`.
+
+**Validation:** `python -m pytest` → **53 passed**; ruff clean.
+
+**Measured results:**
+- `gate-demo`: degraded candidate (production strategy switched hybrid→dense,
+  recall 1.000→0.929, −0.071 > 0.03 tolerance) → **FAIL** with reason; healthy
+  candidate (hybrid) → **PASS**. Decision derives from metrics, not test names.
+- `calibrate` (hybrid): F1-optimal threshold 0.20 (P0.69/R0.73) breaches the
+  gate's 0.90 precision floor; precision-safe 0.15 (P1.00/R0.47) is the current
+  default and satisfies the gate. Full sweep in docs/quality-gate.md.

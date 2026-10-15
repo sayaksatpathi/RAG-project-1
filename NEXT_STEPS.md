@@ -1,19 +1,21 @@
 # Next Steps (resume here)
 
 ## Immediately executable
-1. **Phase 4 — quality gate:** candidate-vs-baseline evaluator reading the
-   harness report, versioned thresholds in a policy file, machine-readable
-   pass/fail, and a deliberate-regression demo the gate rejects. Also calibrate
-   `abstain_min_score` on a validation split and report precision/recall.
-2. Configure a real embedding provider (`sentence-transformers`) and re-run the
-   identical harness to give the routing experiment (Phase 3) genuine headroom.
-3. Optionally expand `benchmark_v1.json` toward ~100 cases and add graded
-   relevance labels to exercise nDCG beyond binary.
+1. **Phase 5 — traceability:** persist evaluation-run metadata and enforce that
+   an incompatible embedding/chunk change triggers deliberate re-index (the
+   `index_version` guard exists; add a stored-run registry and a CI gate job).
+2. **Phase 8 — CI:** wire a GitHub Actions workflow running lint, tests, the
+   retrieval regression gate, and the gate-demo (offline, no paid API).
+3. Configure a real embedding provider (`sentence-transformers`) and re-run the
+   harness + `calibrate` to give routing (Phase 3) and abstention genuine
+   semantic headroom.
+4. Optionally expand `benchmark_v1.json` toward ~100 cases with graded relevance.
 
 ## Done since last checkpoint
-- Phase 1 vertical slice (VERIFIED). Phase 2 baselines + metrics harness
-  (VERIFIED). Phase 3 adaptive router + ablation (VERIFIED); H1 neutral result
-  recorded in docs/research.md and docs/benchmark-results.md.
+- Phases 1–4 VERIFIED. Vertical slice; baselines + metrics harness; adaptive
+  router + ablation (H1 neutral); quality gate + regression demo (FAIL/PASS) +
+  abstention calibration. Results in docs/research.md, docs/benchmark-results.md,
+  docs/quality-gate.md.
 
 ## Deferred / blocked (environment)
 - Docker Compose, Kubernetes/Helm: authored but NOT VERIFIED (no runtime).

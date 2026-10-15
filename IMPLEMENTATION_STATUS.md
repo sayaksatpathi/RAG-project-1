@@ -29,7 +29,7 @@ Last updated: 2026-10-15
 | 1 | Vertical slice (ingest→index→retrieve→generate→cite→abstain) | VERIFIED (24 tests, ruff clean, E2E CLI) |
 | 2 | Retrieval baselines (BM25, dense, hybrid, rerank) | VERIFIED (B0-B3 harness, metrics, report; 38 tests) |
 | 3 | Adaptive routing experiment | VERIFIED (B4 router, ablation, 45 tests; H1 neutral result recorded) |
-| 4 | Evidence controls & evaluation gate | NOT STARTED |
+| 4 | Evidence controls & evaluation gate | VERIFIED (gate policy, regression demo FAIL/PASS, calibration; 53 tests) |
 | 5 | Data/model/config traceability | NOT STARTED |
 | 6 | API & app hardening | NOT STARTED |
 | 7 | Observability & dashboard | NOT STARTED |
