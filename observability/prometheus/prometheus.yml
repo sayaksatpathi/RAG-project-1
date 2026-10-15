@@ -1,0 +1,10 @@
+# Minimal Prometheus scrape config for the RAGBench API /metrics endpoint.
+# Point `targets` at wherever the API is reachable (host:port).
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: ragbench-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["localhost:8000"]

@@ -10,14 +10,15 @@ data — never executed.
 from __future__ import annotations
 
 import time
-import uuid
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 
 from ragbench.config import load_config
 from ragbench.ingestion.parsing import MAX_BYTES, ParseError
+from ragbench.observability import Metrics, get_logger, new_request_id
+from ragbench.observability.metrics import CONTENT_TYPE
 from ragbench.pipeline import Pipeline
 
 
@@ -58,18 +59,44 @@ def create_app(pipeline: Pipeline | None = None) -> FastAPI:
     config = load_config()
     pipeline = pipeline or Pipeline(config=config)
     app = FastAPI(title="RAGBench API", version="0.1.0")
+    metrics = Metrics()
+    log = get_logger("ragbench.api")
+    app.state.metrics = metrics
 
     def require_token(authorization: str | None = Header(default=None)) -> None:
         expected = f"Bearer {config.api_token}"
         if authorization != expected:
             raise HTTPException(status_code=401, detail="invalid or missing bearer token")
 
+    def _route(request: Request) -> str:
+        route = request.scope.get("route")
+        return getattr(route, "path", request.url.path)
+
     @app.middleware("http")
-    async def add_request_id(request: Request, call_next):
-        request.state.request_id = str(uuid.uuid4())
-        response = await call_next(request)
+    async def observe(request: Request, call_next):
+        request.state.request_id = new_request_id()
+        start = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            metrics.provider_errors_total.labels(kind="unhandled").inc()
+            raise
+        latency = time.perf_counter() - start
+        route = _route(request)
+        metrics.observe_request(request.method, route, response.status_code, latency)
         response.headers["X-Request-ID"] = request.state.request_id
+        # Structured log line; never logs raw query/body content.
+        log.info("request", extra={"fields": {
+            "request_id": request.state.request_id, "method": request.method,
+            "route": route, "status": response.status_code,
+            "latency_ms": round(latency * 1000, 2),
+        }})
         return response
+
+    @app.get("/metrics")
+    def prometheus_metrics() -> Response:
+        metrics.indexed_documents.set(pipeline.store.count_documents())
+        return Response(content=metrics.render(), media_type=CONTENT_TYPE)
 
     @app.get("/health/live")
     def live() -> dict:
@@ -88,6 +115,7 @@ def create_app(pipeline: Pipeline | None = None) -> FastAPI:
         start = time.perf_counter()
         answer = pipeline.query(req.query, strategy=req.strategy, top_k=req.top_k)
         latency = (time.perf_counter() - start) * 1000
+        metrics.observe_query(answer.retrieval_strategy, answer.abstained)
         return QueryResponse(
             answer=answer.text,
             citations=[CitationModel(chunk_id=c.chunk_id, document_id=c.document_id, valid=c.valid)

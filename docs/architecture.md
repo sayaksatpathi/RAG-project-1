@@ -17,6 +17,8 @@ are labeled.
 | `ragbench/routing/` | Interpretable query-aware router with hybrid fallback. |
 | `ragbench/evaluation/` | Ranking metrics, baseline harness (B0–B4), ablation, abstention calibration. |
 | `ragbench/gate/` | Versioned quality-gate policy + candidate-vs-baseline evaluator + regression demo. |
+| `ragbench/observability/` | JSON logging (request IDs) + Prometheus metrics. |
+| `apps/dashboard/` | Streamlit dashboard (playground, docs, experiments, gate, ops). |
 | `ragbench/pipeline.py` | Online query path + ingestion path orchestration. |
 | `ragbench/api/` | FastAPI app (health, query, document CRUD, metrics). |
 | `ragbench/cli.py` | `ingest` / `query` / `stats`. |

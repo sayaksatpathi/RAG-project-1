@@ -112,3 +112,19 @@ dependency-scan (pip-audit); `docs/deployment.md`.
 this session. **NOT VERIFIED:** Docker build/compose runtime (Docker
 unavailable) and the hosted GitHub Actions run (no remote) — marked honestly in
 docs/deployment.md and IMPLEMENTATION_STATUS.md.
+
+## 2026-10-15 — Phase 7 (observability & dashboard)
+
+**Built:** structured JSON logging with request IDs + `X-Request-ID` header
+(no raw query/content logged); Prometheus metrics (`ragbench/observability`,
+per-app CollectorRegistry) for requests, latency histogram, retrieval strategy,
+abstentions, provider errors, indexed-documents gauge; `/metrics` endpoint;
+API middleware wiring; a Streamlit dashboard (`apps/dashboard/app.py`) with
+RAG playground / documents / experiment comparison / quality gate / operations
+screens and honest empty states; Prometheus scrape config and a starter Grafana
+dashboard JSON; `docs/observability.md`.
+
+**Validation:** `python -m pytest` → **59 passed**; ruff clean; dashboard
+`py_compile` clean. `/metrics` verified to render real counters after traffic
+(integration test). **NOT VERIFIED:** live Grafana load and interactive
+Streamlit render (no runtime) — marked honestly.

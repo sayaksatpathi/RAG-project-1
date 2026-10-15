@@ -32,7 +32,7 @@ Last updated: 2026-10-15
 | 4 | Evidence controls & evaluation gate | VERIFIED (gate policy, regression demo FAIL/PASS, calibration; 53 tests) |
 | 5 | Data/model/config traceability | NOT STARTED |
 | 6 | API & app hardening | NOT STARTED |
-| 7 | Observability & dashboard | NOT STARTED |
+| 7 | Observability & dashboard | PARTIAL — logging/metrics/`/metrics` VERIFIED (59 tests); Grafana + Streamlit authored, live render NOT VERIFIED |
 | 8 | Docker & CI/CD | PARTIAL — CI offline steps + gate-demo VERIFIED locally; Docker build/compose authored, NOT VERIFIED (no Docker); hosted CI run NOT VERIFIED (no remote) |
 | 9 | Kubernetes & Helm | NOT STARTED |
 | 10 | Terraform & cloud | NOT STARTED |

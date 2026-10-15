@@ -1,0 +1,62 @@
+{
+  "title": "RAGBench",
+  "schemaVersion": 39,
+  "editable": true,
+  "tags": ["ragbench"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request rate by route",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "sum by (route) (rate(ragbench_requests_total[5m]))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Request latency p95 (s)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le, route) (rate(ragbench_request_latency_seconds_bucket[5m])))", "legendFormat": "{{route}}"}
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Retrieval strategy distribution",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [
+        {"expr": "sum by (strategy) (rate(ragbench_retrieval_strategy_total[15m]))", "legendFormat": "{{strategy}}"}
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Abstention rate",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+      "targets": [
+        {"expr": "rate(ragbench_abstentions_total[15m])", "legendFormat": "abstentions/s"}
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Indexed documents",
+      "type": "stat",
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+      "targets": [{"expr": "ragbench_indexed_documents"}]
+    },
+    {
+      "id": 6,
+      "title": "Provider errors",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "targets": [
+        {"expr": "sum by (kind) (rate(ragbench_provider_errors_total[15m]))", "legendFormat": "{{kind}}"}
+      ]
+    }
+  ]
+}

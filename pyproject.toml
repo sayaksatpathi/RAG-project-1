@@ -13,11 +13,13 @@ dependencies = [
     "uvicorn>=0.27",
     "numpy>=1.26",
     "python-multipart>=0.0.9",
+    "prometheus-client>=0.20",
 ]
 
 [project.optional-dependencies]
 # Heavy / optional capabilities. The core offline path does NOT require these.
 ml = ["sentence-transformers>=2.5", "scikit-learn>=1.4"]
+dashboard = ["streamlit>=1.30"]
 dev = ["pytest>=8.0", "ruff>=0.4", "httpx>=0.27"]
 
 [project.scripts]

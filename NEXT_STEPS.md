@@ -1,22 +1,21 @@
 # Next Steps (resume here)
 
 ## Immediately executable
-1. **Verify Docker/CI where a runtime exists:** build the image and run
-   `docker compose up` on a machine with Docker; push to GitHub to execute the
-   Actions workflow. Flip the NOT VERIFIED markers once done.
-2. **Phase 7 — observability & dashboard:** structured logs, request IDs,
-   Prometheus metrics, a Streamlit dashboard (RAG playground, experiment
-   comparison, quality-gate view) with honest empty states.
-3. **Phase 5 — traceability:** persist evaluation-run metadata/registry; enforce
+1. **Phase 5 — traceability:** persist evaluation-run metadata/registry; enforce
    re-index on incompatible embedding/chunk changes (the `index_version` guard
-   exists).
-4. Configure a real embedding provider and re-run harness + `calibrate`.
+   exists). Add `docs/runbook.md` (Phase 14 deliverable) and a controlled
+   failure-experiment harness (Phase 11).
+2. **Verify where a runtime exists:** build the Docker image + `compose up`;
+   push to run GitHub Actions; load the Grafana dashboard against a live
+   Prometheus; run the Streamlit dashboard. Flip the NOT VERIFIED markers.
+3. Configure a real embedding provider and re-run harness + `calibrate`.
+4. Phases 9 (K8s/Helm), 10 (Terraform), 12 (research report) remain.
 
 ## Done since last checkpoint
-- Phases 1–4 VERIFIED. Phase 8 PARTIAL: CI offline steps + gate-demo verified
-  locally; Docker/compose authored (NOT VERIFIED, no Docker); hosted CI run NOT
-  VERIFIED (no remote). Results in docs/{research,benchmark-results,quality-gate,
-  deployment}.md.
+- Phases 1–4 VERIFIED. Phase 8 PARTIAL (CI offline steps + gate-demo verified;
+  Docker/compose + hosted CI NOT VERIFIED). Phase 7 PARTIAL: logging/metrics/
+  `/metrics` VERIFIED; Grafana + Streamlit authored, live render NOT VERIFIED.
+  Docs in docs/{research,benchmark-results,quality-gate,deployment,observability}.md.
 
 ## Deferred / blocked (environment)
 - Docker Compose, Kubernetes/Helm: authored but NOT VERIFIED (no runtime).
