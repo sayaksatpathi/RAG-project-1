@@ -1,21 +1,22 @@
 # Next Steps (resume here)
 
 ## Immediately executable
-1. **Phase 5 — traceability:** persist evaluation-run metadata/registry; enforce
-   re-index on incompatible embedding/chunk changes (the `index_version` guard
-   exists). Add `docs/runbook.md` (Phase 14 deliverable) and a controlled
-   failure-experiment harness (Phase 11).
-2. **Verify where a runtime exists:** build the Docker image + `compose up`;
-   push to run GitHub Actions; load the Grafana dashboard against a live
-   Prometheus; run the Streamlit dashboard. Flip the NOT VERIFIED markers.
-3. Configure a real embedding provider and re-run harness + `calibrate`.
-4. Phases 9 (K8s/Helm), 10 (Terraform), 12 (research report) remain.
+1. **Phase 11 — reliability:** controlled failure experiments (slow/failed
+   provider, DB unavailable, malformed upload, bounded load) + latency
+   percentiles; add `docs/runbook.md`.
+2. **Phase 9 — K8s/Helm:** local deployment manifests + Helm chart with probes,
+   resources; validate with available tooling, mark runtime NOT VERIFIED.
+3. **Phase 12 — research report:** regenerate tables from run artifacts; expand
+   docs/research.md with threats/ablations.
+4. **Verify where a runtime exists:** Docker build + `compose up`; GitHub Actions
+   run; live Grafana/Streamlit. Configure a real embedding provider; re-run
+   harness + `calibrate`. Phase 10 (Terraform) remains.
 
 ## Done since last checkpoint
-- Phases 1–4 VERIFIED. Phase 8 PARTIAL (CI offline steps + gate-demo verified;
-  Docker/compose + hosted CI NOT VERIFIED). Phase 7 PARTIAL: logging/metrics/
-  `/metrics` VERIFIED; Grafana + Streamlit authored, live render NOT VERIFIED.
-  Docs in docs/{research,benchmark-results,quality-gate,deployment,observability}.md.
+- Phases 1–5 + 7 + 8 covered. 1–4 & 5 VERIFIED; 7 & 8 PARTIAL (Docker/compose,
+  hosted CI, live Grafana/Streamlit NOT VERIFIED — no runtime). 63 tests pass.
+  Docs in docs/{research,benchmark-results,quality-gate,deployment,observability,
+  traceability}.md.
 
 ## Deferred / blocked (environment)
 - Docker Compose, Kubernetes/Helm: authored but NOT VERIFIED (no runtime).

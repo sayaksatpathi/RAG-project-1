@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS documents (
     parser_version TEXT NOT NULL,
     status TEXT NOT NULL,
     num_chunks INTEGER NOT NULL DEFAULT 0,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    text TEXT NOT NULL DEFAULT ''
 );
 CREATE TABLE IF NOT EXISTS chunks (
     id TEXT PRIMARY KEY,
@@ -54,7 +55,15 @@ class SQLiteStore:
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
         self.conn.executescript(_SCHEMA)
+        self._migrate()
         self.conn.commit()
+
+    def _migrate(self) -> None:
+        # Add the `text` column to pre-existing databases created before it was
+        # introduced (idempotent).
+        cols = {r["name"] for r in self.conn.execute("PRAGMA table_info(documents)")}
+        if "text" not in cols:
+            self.conn.execute("ALTER TABLE documents ADD COLUMN text TEXT NOT NULL DEFAULT ''")
 
     # --- documents -------------------------------------------------------
     def find_document_by_hash(self, content_hash: str) -> Document | None:
@@ -65,11 +74,32 @@ class SQLiteStore:
 
     def add_document(self, doc: Document) -> None:
         self.conn.execute(
-            "INSERT INTO documents(id, filename, content_hash, parser_version, status, num_chunks)"
-            " VALUES (?,?,?,?,?,?)",
+            "INSERT INTO documents(id, filename, content_hash, parser_version, status,"
+            " num_chunks, text) VALUES (?,?,?,?,?,?,?)",
             (doc.id, doc.filename, doc.content_hash, doc.parser_version, doc.status,
-             doc.num_chunks),
+             doc.num_chunks, doc.text),
         )
+        self.conn.commit()
+
+    def iter_documents(self) -> list[Document]:
+        rows = self.conn.execute(
+            "SELECT * FROM documents ORDER BY created_at, id"
+        ).fetchall()
+        return [self._doc(r) for r in rows]
+
+    def distinct_index_versions(self) -> set[str]:
+        rows = self.conn.execute("SELECT DISTINCT index_version FROM chunks").fetchall()
+        return {r["index_version"] for r in rows}
+
+    def count_chunks(self, index_version: str | None = None) -> int:
+        if index_version is None:
+            return self.conn.execute("SELECT COUNT(*) AS n FROM chunks").fetchone()["n"]
+        return self.conn.execute(
+            "SELECT COUNT(*) AS n FROM chunks WHERE index_version = ?", (index_version,)
+        ).fetchone()["n"]
+
+    def delete_chunks_for_document(self, doc_id: str) -> None:
+        self.conn.execute("DELETE FROM chunks WHERE document_id = ?", (doc_id,))
         self.conn.commit()
 
     def list_documents(self, limit: int = 50, offset: int = 0) -> list[Document]:
@@ -142,4 +172,5 @@ class SQLiteStore:
             id=row["id"], filename=row["filename"], content_hash=row["content_hash"],
             parser_version=row["parser_version"], status=row["status"],
             num_chunks=row["num_chunks"], created_at=row["created_at"],
+            text=row["text"] if "text" in row.keys() else "",
         )

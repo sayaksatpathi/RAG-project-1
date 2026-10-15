@@ -10,7 +10,7 @@ are labeled.
 | `ragbench/config.py` | Env-driven config; derives `index_version`. |
 | `ragbench/ingestion/` | Parsing/normalization, versioned chunking, stable IDs. |
 | `ragbench/embeddings/` | Embedding Protocol + deterministic fake provider. |
-| `ragbench/storage/` | SQLite persistence (documents/chunks/embeddings). |
+| `ragbench/storage/` | SQLite persistence (documents+text/chunks/embeddings) + run registry. |
 | `ragbench/retrieval/` | BM25, dense cosine, RRF fusion, hybrid orchestrator. |
 | `ragbench/generation/` | Generation Protocol, mock provider, citation validation. |
 | `ragbench/reranking/` | Reranker interface + deterministic heuristic stand-in. |

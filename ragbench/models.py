@@ -18,6 +18,7 @@ class Document:
     status: str = "indexed"
     num_chunks: int = 0
     created_at: str = ""
+    text: str = ""  # normalized full text, retained to enable re-indexing
 
 
 @dataclass

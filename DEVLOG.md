@@ -128,3 +128,19 @@ dashboard JSON; `docs/observability.md`.
 `py_compile` clean. `/metrics` verified to render real counters after traffic
 (integration test). **NOT VERIFIED:** live Grafana load and interactive
 Streamlit render (no runtime) — marked honestly.
+
+## 2026-10-15 — Phase 5 (data/model/config traceability)
+
+**Built:** persist full normalized document text (`documents.text` column +
+idempotent ALTER-TABLE migration) so documents can be re-chunked; index-mismatch
+enforcement — `IndexMismatchError` raised when documents exist but no chunks
+match the active `index_version`, with `Pipeline.index_health()` and
+`Pipeline.reindex()` (rebuilds every doc under the active version and removes
+other-version chunks, never mixing); a persistent evaluation-run registry
+(`ragbench/storage/run_registry.py`) recording run_id/timestamp/git_commit/
+dataset_version/index_version/config/metrics/report_path; CLI `index-health`,
+`reindex`, `runs`, and auto-registration on `evaluate`.
+
+**Validation:** `python -m pytest` → **63 passed**; ruff clean. CLI smoke:
+`index-health` reports active vs present versions; `evaluate` registers a run;
+`runs` lists it with its git commit and index version (traceable).

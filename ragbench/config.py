@@ -19,6 +19,7 @@ def _get(name: str, default: str) -> str:
 class Config:
     storage: str = _get("RAGBENCH_STORAGE", "sqlite")
     sqlite_path: str = _get("RAGBENCH_SQLITE_PATH", "data/ragbench.db")
+    runs_db_path: str = _get("RAGBENCH_RUNS_DB", "data/ragbench_runs.db")
     postgres_dsn: str | None = os.environ.get("RAGBENCH_POSTGRES_DSN")
 
     embedding_provider: str = _get("RAGBENCH_EMBEDDING_PROVIDER", "fake")

@@ -61,6 +61,10 @@ def main(argv: list[str] | None = None) -> int:
     pq.add_argument("question")
     pq.add_argument("--strategy", default="hybrid", choices=["bm25", "dense", "hybrid"])
     sub.add_parser("stats")
+    sub.add_parser("reindex", help="rebuild all documents under the active index_version")
+    sub.add_parser("index-health")
+    pr = sub.add_parser("runs", help="list recorded evaluation runs")
+    pr.add_argument("--limit", type=int, default=20)
     pe = sub.add_parser("evaluate")
     pe.add_argument("--corpus", default="evaluation/datasets/corpus")
     pe.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
@@ -84,6 +88,13 @@ def main(argv: list[str] | None = None) -> int:
         if not args.no_write:
             json_path, md_path = write_report(report)
             print(f"wrote {json_path}\nwrote {md_path}")
+            from ragbench.config import load_config
+            from ragbench.storage import RunRegistry
+
+            reg = RunRegistry(load_config().runs_db_path)
+            reg.record(report, report_path=json_path)
+            reg.close()
+            print(f"registered run {report['run_id'][:8]} in the run registry")
         return 0
     if args.cmd == "gate-demo":
         from ragbench.gate.service import regression_demo
@@ -111,6 +122,19 @@ def main(argv: list[str] | None = None) -> int:
         return _query(pipeline, args.question, args.strategy)
     if args.cmd == "stats":
         print(json.dumps(pipeline.stats(), indent=2))
+        return 0
+    if args.cmd == "index-health":
+        print(json.dumps(pipeline.index_health(), indent=2))
+        return 0
+    if args.cmd == "reindex":
+        print(json.dumps(pipeline.reindex(), indent=2))
+        return 0
+    if args.cmd == "runs":
+        from ragbench.storage import RunRegistry
+
+        reg = RunRegistry(pipeline.config.runs_db_path)
+        print(json.dumps(reg.list_runs(limit=args.limit), indent=2))
+        reg.close()
         return 0
     return 1
 

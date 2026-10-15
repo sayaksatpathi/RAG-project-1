@@ -27,6 +27,12 @@ def _doc_id(content_hash_hex: str) -> str:
     return f"d_{content_hash_hex[:16]}"
 
 
+class IndexMismatchError(RuntimeError):
+    """Raised when documents exist but none are indexed under the active
+    index_version (embedding/chunk configuration changed). The caller must run a
+    deliberate re-index rather than silently serve an empty or stale index."""
+
+
 class Pipeline:
     def __init__(self, config: Config | None = None, store: SQLiteStore | None = None) -> None:
         self.config = config or load_config()
@@ -48,7 +54,7 @@ class Pipeline:
         iv = self.config.index_version
         doc = Document(
             id=_doc_id(chash), filename=filename, content_hash=chash,
-            parser_version=PARSER_VERSION, status="indexing",
+            parser_version=PARSER_VERSION, status="indexing", text=text,
         )
         self.store.add_document(doc)
 
@@ -81,11 +87,61 @@ class Pipeline:
             self._dirty = True
         return ok
 
+    def reindex(self) -> dict:
+        """Deliberately rebuild every document's chunks/embeddings under the
+        active index_version, removing chunks from any other version so
+        incompatible vectors are never mixed. Returns a summary."""
+        iv = self.config.index_version
+        docs = self.store.iter_documents()
+        total_chunks = 0
+        for doc in docs:
+            self.store.delete_chunks_for_document(doc.id)
+            chunks = chunk_text(doc.text, self.config.chunk_size, self.config.chunk_overlap)
+            status = "indexed" if chunks else "empty"
+            if chunks:
+                vectors = self.embedder.embed(chunks)
+                for seq, (ctext, vec) in enumerate(zip(chunks, vectors, strict=True)):
+                    cid = make_chunk_id(doc.id, seq, iv)
+                    self.store.add_chunk(
+                        Chunk(id=cid, document_id=doc.id, sequence=seq, text=ctext,
+                              content_hash=content_hash(ctext), index_version=iv),
+                        vec,
+                    )
+            self.store.conn.execute(
+                "UPDATE documents SET status = ?, num_chunks = ? WHERE id = ?",
+                (status, len(chunks), doc.id),
+            )
+            self.store.conn.commit()
+            total_chunks += len(chunks)
+        self._dirty = True
+        return {"documents": len(docs), "index_version": iv, "chunks": total_chunks}
+
     # --- indexing --------------------------------------------------------
+    def index_health(self) -> dict:
+        iv = self.config.index_version
+        present = self.store.distinct_index_versions()
+        docs = self.store.count_documents()
+        active_chunks = self.store.count_chunks(iv)
+        return {
+            "active_index_version": iv,
+            "present_index_versions": sorted(present),
+            "documents": docs,
+            "active_chunks": active_chunks,
+            "reindex_required": docs > 0 and active_chunks == 0,
+        }
+
     def _ensure_retriever(self) -> HybridRetriever:
         if self._retriever is not None and not self._dirty:
             return self._retriever
         iv = self.config.index_version
+        # Reject an incompatible index rather than silently serving nothing.
+        if self.store.count_documents() > 0 and self.store.count_chunks(iv) == 0:
+            present = sorted(self.store.distinct_index_versions())
+            raise IndexMismatchError(
+                f"no chunks for active index_version '{iv}'; present versions: "
+                f"{present}. The embedding/chunk configuration changed — run a "
+                f"re-index (ragbench reindex / Pipeline.reindex())."
+            )
         bm25 = BM25Index()
         dense = DenseIndex(self.config.embedding_dim)
         texts: dict[str, str] = {}
