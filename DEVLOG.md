@@ -176,6 +176,18 @@ PyYAML. **NOT VERIFIED:** no cluster/kubectl/helm available — `helm lint`,
 `helm template`, and `kubectl apply` not run. Exact verification commands and
 the NOT VERIFIED status are in docs/deployment.md and IMPLEMENTATION_STATUS.md.
 
+## 2026-10-15 — Optional provider paths made real
+
+Closed two dangling optional references the factories pointed at: implemented
+`ragbench/embeddings/sentence_transformers_provider.py` and
+`ragbench/generation/openai_provider.py`. Both import cleanly with no network or
+credential access and fail with a clear, actionable error when their dependency/
+credential is absent (previously the config option would have thrown a
+ModuleNotFoundError about RAGBench's own package). The OpenAI provider uses the
+already-present httpx, a bounded timeout, and bounded transient-only retries.
+Also fixed the pipeline to size the dense index from the embedder's actual
+dimension rather than the config value. 73 tests pass; ruff clean.
+
 ## 2026-10-15 — Phase 10 (Terraform & cloud readiness)
 
 **Built:** `infrastructure/terraform/` — minimal opt-in AWS IaC: ECR repo

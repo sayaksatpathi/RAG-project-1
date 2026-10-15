@@ -143,7 +143,9 @@ class Pipeline:
                 f"re-index (ragbench reindex / Pipeline.reindex())."
             )
         bm25 = BM25Index()
-        dense = DenseIndex(self.config.embedding_dim)
+        # Use the embedder's actual dimension (model-defined for real providers),
+        # not the config value, so real embedding models never shape-mismatch.
+        dense = DenseIndex(self.embedder.dim)
         texts: dict[str, str] = {}
         doc_of: dict[str, str] = {}
         for chunk, vec in self.store.iter_chunks(index_version=iv):
