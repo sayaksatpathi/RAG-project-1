@@ -7,7 +7,7 @@
 | Local (Python) | **VERIFIED** — CLI, API, tests, evaluate, gate-demo, calibrate all run. |
 | Docker image / Compose | **NOT VERIFIED** — authored and YAML-validated; Docker is unavailable in the dev environment, so the image has not been built or run. |
 | GitHub Actions CI | **NOT VERIFIED on GitHub** — workflow YAML is valid and its offline steps (`evaluate`, `gate-demo`, `pytest`, `ruff`) are verified locally; the hosted run has not executed (no remote). |
-| Kubernetes / Helm | NOT STARTED. |
+| Kubernetes / Helm | **AUTHORED, NOT VERIFIED** — manifests + Helm chart written; plain manifest YAML and chart metadata validate with PyYAML; no cluster/kubectl/helm available to apply, lint, or render. |
 | Terraform / cloud | NOT STARTED. |
 
 ## Local (verified)
@@ -35,6 +35,40 @@ declares a container `HEALTHCHECK` against `/health/live`. The default
 configuration is fully offline (fake embeddings, mock generation); override
 `RAGBENCH_API_TOKEN` (and any provider settings) via environment for a real
 deployment. No external hosted LLM access is required to start the service.
+
+## Kubernetes (authored, not verified)
+
+Plain manifests in `deploy/kubernetes/` (ConfigMap, Secret template, PVC,
+Deployment, Service) and a Helm chart in `deploy/helm/ragbench/`. Both set
+liveness/readiness/startup probes, resource requests/limits, and a hardened
+non-root security context (`runAsNonRoot`, `readOnlyRootFilesystem`, dropped
+capabilities). SQLite uses a ReadWriteOnce volume, so the Deployment runs a
+**single replica** with a `Recreate` strategy — this is deliberate and is **not**
+an auto-scaling or HA claim; horizontal scaling requires the Postgres backend.
+
+```bash
+# Build and load the image into a local cluster (e.g. kind), then:
+kubectl create secret generic ragbench-secret \
+  --from-literal=RAGBENCH_API_TOKEN=$(openssl rand -hex 24)
+kubectl apply -f deploy/kubernetes/configmap.yaml \
+               -f deploy/kubernetes/pvc.yaml \
+               -f deploy/kubernetes/deployment.yaml \
+               -f deploy/kubernetes/service.yaml
+kubectl rollout status deploy/ragbench-api
+kubectl logs deploy/ragbench-api
+kubectl rollout undo deploy/ragbench-api   # rollback
+
+# Or with Helm:
+helm lint deploy/helm/ragbench
+helm template rb deploy/helm/ragbench      # render to inspect
+helm install rb deploy/helm/ragbench --set apiToken=$(openssl rand -hex 24)
+```
+
+**NOT VERIFIED:** no cluster, `kubectl`, or `helm` is available in this
+environment, so `helm lint`/`template` and `kubectl apply` have not been run.
+The plain-YAML manifests and the chart's `Chart.yaml`/`values.yaml` parse
+cleanly; the Go-templated files are unrendered. If `readOnlyRootFilesystem`
+causes a write error at runtime, mount an `emptyDir` at `/tmp`.
 
 ## CI (GitHub Actions)
 

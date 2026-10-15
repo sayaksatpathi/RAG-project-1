@@ -34,7 +34,7 @@ Last updated: 2026-10-15
 | 6 | API & app hardening | NOT STARTED |
 | 7 | Observability & dashboard | PARTIAL — logging/metrics/`/metrics` VERIFIED (59 tests); Grafana + Streamlit authored, live render NOT VERIFIED |
 | 8 | Docker & CI/CD | PARTIAL — CI offline steps + gate-demo VERIFIED locally; Docker build/compose authored, NOT VERIFIED (no Docker); hosted CI run NOT VERIFIED (no remote) |
-| 9 | Kubernetes & Helm | NOT STARTED |
+| 9 | Kubernetes & Helm | AUTHORED, NOT VERIFIED — manifests + Helm chart (probes, resources, non-root); YAML/chart metadata validated; no cluster/kubectl/helm |
 | 10 | Terraform & cloud | NOT STARTED |
 | 11 | Reliability & performance | VERIFIED (5 failure experiments PASS, load harness p50/p95/p99, runbook; 68 tests) |
 | 12 | Research report | NOT STARTED |

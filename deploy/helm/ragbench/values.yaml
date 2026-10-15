@@ -1,0 +1,44 @@
+image:
+  repository: ragbench
+  tag: local
+  pullPolicy: IfNotPresent
+
+# Single replica with the SQLite backend (ReadWriteOnce volume). Raise only with
+# the Postgres backend.
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  size: 1Gi
+
+# Non-secret configuration (rendered into a ConfigMap).
+config:
+  RAGBENCH_STORAGE: sqlite
+  RAGBENCH_SQLITE_PATH: /data/ragbench.db
+  RAGBENCH_EMBEDDING_PROVIDER: fake
+  RAGBENCH_LLM_PROVIDER: mock
+  RAGBENCH_TOP_K: "5"
+
+# API token. For real use, set an existing secret name instead of a literal:
+#   existingSecret: ragbench-secret
+# Leave apiToken empty in committed values; override at install time.
+apiToken: ""
+existingSecret: ""
+
+probes:
+  liveness:
+    path: /health/live
+  readiness:
+    path: /health/ready

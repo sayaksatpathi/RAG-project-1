@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ragbench-api
+  labels:
+    app: ragbench
+spec:
+  type: ClusterIP
+  selector:
+    app: ragbench
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000

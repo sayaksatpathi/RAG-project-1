@@ -161,3 +161,17 @@ load/latency harness (p50/p95/p99, throughput, error rate, conditions); CLI
 → ~1343 qps, 0 errors, p50/p95/p99 = 0.71/0.90/1.34 ms (offline, 14-doc corpus,
 fake embedding, mock LLM, single thread). Conditions stated; not a production
 claim. Recorded in docs/benchmark-results.md.
+
+## 2026-10-15 — Phase 9 (Kubernetes & Helm)
+
+**Built:** `deploy/kubernetes/` plain manifests (ConfigMap, Secret template,
+PVC, Deployment, Service) and `deploy/helm/ragbench/` Helm chart (Chart,
+values, templated deployment/service/configmap/secret/pvc + _helpers). Both
+include liveness/readiness/startup probes, resource requests/limits, and a
+hardened non-root securityContext. Single replica + Recreate with SQLite (RWO);
+scaling documented as requiring the Postgres backend (no false HA claim).
+
+**Validation:** plain manifest YAML and Chart.yaml/values.yaml parse with
+PyYAML. **NOT VERIFIED:** no cluster/kubectl/helm available — `helm lint`,
+`helm template`, and `kubectl apply` not run. Exact verification commands and
+the NOT VERIFIED status are in docs/deployment.md and IMPLEMENTATION_STATUS.md.

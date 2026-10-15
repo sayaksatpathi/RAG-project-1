@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ragbench-config
+  labels:
+    app: ragbench
+data:
+  # Non-secret configuration. The API token is a Secret (see secret.example.yaml).
+  RAGBENCH_STORAGE: "sqlite"
+  RAGBENCH_SQLITE_PATH: "/data/ragbench.db"
+  RAGBENCH_EMBEDDING_PROVIDER: "fake"
+  RAGBENCH_LLM_PROVIDER: "mock"
+  RAGBENCH_TOP_K: "5"
