@@ -13,6 +13,8 @@ are labeled.
 | `ragbench/storage/` | SQLite persistence (documents/chunks/embeddings). |
 | `ragbench/retrieval/` | BM25, dense cosine, RRF fusion, hybrid orchestrator. |
 | `ragbench/generation/` | Generation Protocol, mock provider, citation validation. |
+| `ragbench/reranking/` | Reranker interface + deterministic heuristic stand-in. |
+| `ragbench/evaluation/` | Ranking metrics + reproducible baseline harness (B0–B3). |
 | `ragbench/pipeline.py` | Online query path + ingestion path orchestration. |
 | `ragbench/api/` | FastAPI app (health, query, document CRUD, metrics). |
 | `ragbench/cli.py` | `ingest` / `query` / `stats`. |

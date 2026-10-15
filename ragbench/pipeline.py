@@ -165,7 +165,9 @@ class Pipeline:
         if self.embedder.name.startswith("fake:"):
             from ragbench.embeddings import _STOPWORDS
 
-            q_terms = {t for t in tokenize(question) if t not in _STOPWORDS}
+            # Ignore stopwords and single-character tokens (e.g. the "s" from a
+            # tokenized possessive), which are never meaningful content signals.
+            q_terms = {t for t in tokenize(question) if len(t) > 1 and t not in _STOPWORDS}
             passage_terms: set[str] = set()
             for r in results[:5]:
                 passage_terms.update(tokenize(r.text))

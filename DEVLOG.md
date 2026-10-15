@@ -37,3 +37,23 @@ tests.
 
 **Phase 1 exit criteria met:** a documented local command demonstrates an
 end-to-end query without paid API credentials; tests execute and pass.
+
+## 2026-10-15 — Phase 2 (retrieval baselines + metrics harness)
+
+**Built:** expanded the synthetic corpus to 14 distinct-topic docs; authored a
+50-case labeled benchmark (`benchmark_v1.json`) across 8 query categories with
+provenance and answerability labels; metrics module (Recall/MRR/nDCG/Hit with
+explicit None-on-no-relevant and dedup-before-truncation semantics); a heuristic
+reranker (honest stand-in, not a trained cross-encoder); a reproducible harness
+running B0 BM25 / B1 dense / B2 hybrid(RRF) / B3 hybrid+rerank through one path,
+emitting JSON+Markdown reports with full run metadata (run_id, git commit,
+dataset/index versions); `ragbench.cli evaluate`.
+
+**Validation (actually run):** `python -m pytest` → **38 passed**; ruff clean.
+Benchmark run `bf643c87` recorded in docs/benchmark-results.md.
+
+**Measured findings (real, incl. negatives):** BM25 strongest on this
+fake-embedding setup (recall@5 1.000); dense weakest (0.929); hybrid matches
+BM25 recall; the heuristic reranker slightly *reduced* mrr/ndcg vs BM25.
+Abstention precision 1.000 but recall only 0.40–0.53 (misleading-overlap cases
+leak) — threshold calibration deferred to Phase 4.

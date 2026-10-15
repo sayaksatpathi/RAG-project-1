@@ -61,8 +61,24 @@ def main(argv: list[str] | None = None) -> int:
     pq.add_argument("question")
     pq.add_argument("--strategy", default="hybrid", choices=["bm25", "dense", "hybrid"])
     sub.add_parser("stats")
+    pe = sub.add_parser("evaluate")
+    pe.add_argument("--corpus", default="evaluation/datasets/corpus")
+    pe.add_argument("--dataset", default="evaluation/datasets/benchmark_v1.json")
+    pe.add_argument("--k", type=int, default=5)
+    pe.add_argument("--no-write", action="store_true", help="print only, do not save a report")
 
     args = parser.parse_args(argv)
+    if args.cmd == "evaluate":
+        # Uses its own in-memory pipeline; never touches the persistent DB.
+        from ragbench.evaluation.harness import render_markdown, run_benchmark, write_report
+
+        report = run_benchmark(args.corpus, args.dataset, k=args.k)
+        print(render_markdown(report))
+        if not args.no_write:
+            json_path, md_path = write_report(report)
+            print(f"wrote {json_path}\nwrote {md_path}")
+        return 0
+
     pipeline = Pipeline()
     if args.cmd == "ingest":
         return _ingest(pipeline, args.path)

@@ -31,7 +31,10 @@ class EmbeddingProvider(Protocol):
 _STOPWORDS = frozenset(
     "a an the of to in on at for and or is are was were be been being do does "
     "did what which who whom how when where why this that these those it its as "
-    "with from by about into over under".split()
+    "with from by about into over under "
+    "i you we they he she me my your our their his her them us "
+    "can could may might must shall should will would not no nor so if then than "
+    "have has had get got take takes taking".split()
 )
 
 

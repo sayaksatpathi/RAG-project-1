@@ -27,7 +27,7 @@ Last updated: 2026-10-15
 |---|---|---|
 | 0 | Audit & bootstrap | VERIFIED |
 | 1 | Vertical slice (ingest→index→retrieve→generate→cite→abstain) | VERIFIED (24 tests, ruff clean, E2E CLI) |
-| 2 | Retrieval baselines (BM25, dense, hybrid, rerank) | NOT STARTED |
+| 2 | Retrieval baselines (BM25, dense, hybrid, rerank) | VERIFIED (B0-B3 harness, metrics, report; 38 tests) |
 | 3 | Adaptive routing experiment | NOT STARTED |
 | 4 | Evidence controls & evaluation gate | NOT STARTED |
 | 5 | Data/model/config traceability | NOT STARTED |

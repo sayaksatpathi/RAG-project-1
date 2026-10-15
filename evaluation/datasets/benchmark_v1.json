@@ -1,0 +1,72 @@
+{
+  "dataset_version": "v1",
+  "created": "2026-10-15",
+  "provenance": "SYNTHETIC starter benchmark. Both the corpus documents and the questions were authored together by the project author, so relevance judgments are genuine by construction (each question is known to concern specific authored documents). Questions are manually reviewed, not model-generated. Relevance is labeled at document granularity via stable filename stems (doc_key); in this corpus each document is a single chunk, so document-level relevance equals passage-level relevance here.",
+  "labels_supported": ["doc_key relevance (binary)", "query_category", "answerability", "expected_abstention"],
+  "labels_not_supported": ["graded relevance beyond binary", "human reference answers for every case"],
+  "license": "Original synthetic content authored for this project; freely reusable within it.",
+  "query_categories": [
+    "direct_fact", "exact_identifier", "paraphrase", "multi_passage",
+    "ambiguous", "unanswerable", "misleading_overlap", "unsupported_probe"
+  ],
+  "cases": [
+    {"id": "q001", "question": "What is reciprocal rank fusion?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["rrf"], "expected_abstention": false},
+    {"id": "q002", "question": "What does the parameter b control in BM25?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["bm25"], "expected_abstention": false},
+    {"id": "q003", "question": "How does dense retrieval match paraphrases?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["dense_retrieval"], "expected_abstention": false},
+    {"id": "q004", "question": "When should a RAG system abstain?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["abstention"], "expected_abstention": false},
+    {"id": "q005", "question": "Why is a cross-encoder reranker expensive?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["cross_encoder_reranking"], "expected_abstention": false},
+    {"id": "q006", "question": "What are chunk size and overlap?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["chunking"], "expected_abstention": false},
+    {"id": "q007", "question": "What is a text embedding?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["embeddings"], "expected_abstention": false},
+    {"id": "q008", "question": "What does pgvector add to PostgreSQL?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["pgvector"], "expected_abstention": false},
+    {"id": "q009", "question": "What does nDCG measure?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["ndcg"], "expected_abstention": false},
+    {"id": "q010", "question": "What is mean reciprocal rank?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["mrr"], "expected_abstention": false},
+    {"id": "q011", "question": "What is prompt injection?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["prompt_injection"], "expected_abstention": false},
+    {"id": "q012", "question": "What is adaptive retrieval routing?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["adaptive_routing"], "expected_abstention": false},
+    {"id": "q013", "question": "What does an AI quality gate do?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["quality_gate"], "expected_abstention": false},
+
+    {"id": "q014", "question": "What causes error code E1042?", "category": "exact_identifier", "answerable": true, "relevant_doc_keys": ["error_code_e1042"], "expected_abstention": false},
+    {"id": "q015", "question": "E1042", "category": "exact_identifier", "answerable": true, "relevant_doc_keys": ["error_code_e1042"], "expected_abstention": false},
+    {"id": "q016", "question": "What are IVFFlat and HNSW indexes?", "category": "exact_identifier", "answerable": true, "relevant_doc_keys": ["pgvector"], "expected_abstention": false},
+    {"id": "q017", "question": "What is the k1 parameter in Okapi BM25?", "category": "exact_identifier", "answerable": true, "relevant_doc_keys": ["bm25"], "expected_abstention": false},
+    {"id": "q018", "question": "What status is assigned when E1042 occurs?", "category": "exact_identifier", "answerable": true, "relevant_doc_keys": ["error_code_e1042"], "expected_abstention": false},
+
+    {"id": "q019", "question": "How can I combine several ranked lists into one ordering?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["rrf"], "expected_abstention": false},
+    {"id": "q020", "question": "Which scoring method penalizes very long documents?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["bm25"], "expected_abstention": false},
+    {"id": "q021", "question": "How do I turn a sentence into a vector of numbers?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["embeddings"], "expected_abstention": false},
+    {"id": "q022", "question": "How can a system decline to answer when it lacks evidence?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["abstention"], "expected_abstention": false},
+    {"id": "q023", "question": "How do I reorder a short list of candidate passages for better accuracy?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["cross_encoder_reranking"], "expected_abstention": false},
+    {"id": "q024", "question": "How is the first correct answer's position scored across questions?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["mrr"], "expected_abstention": false},
+    {"id": "q025", "question": "How do I pick a retrieval method based on the question itself?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["adaptive_routing"], "expected_abstention": false},
+
+    {"id": "q026", "question": "How do reranking and dense retrieval relate, and why rerank only a few candidates?", "category": "multi_passage", "answerable": true, "relevant_doc_keys": ["cross_encoder_reranking", "dense_retrieval"], "expected_abstention": false},
+    {"id": "q027", "question": "Why does nDCG need graded labels while recall and MRR do not?", "category": "multi_passage", "answerable": true, "relevant_doc_keys": ["ndcg", "mrr"], "expected_abstention": false},
+    {"id": "q028", "question": "How do chunk size choices affect embedding-based retrieval?", "category": "multi_passage", "answerable": true, "relevant_doc_keys": ["chunking", "embeddings"], "expected_abstention": false},
+    {"id": "q029", "question": "How does hybrid fusion combine sparse and dense retrieval?", "category": "multi_passage", "answerable": true, "relevant_doc_keys": ["rrf", "dense_retrieval"], "expected_abstention": false},
+    {"id": "q030", "question": "How does a quality gate use a pinned evaluation dataset and thresholds?", "category": "multi_passage", "answerable": true, "relevant_doc_keys": ["quality_gate"], "expected_abstention": false},
+
+    {"id": "q031", "question": "What is the best value of k?", "category": "ambiguous", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q032", "question": "Which one is better?", "category": "ambiguous", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q033", "question": "How much does it cost?", "category": "ambiguous", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+
+    {"id": "q034", "question": "How do I bake sourdough bread at high altitude?", "category": "unanswerable", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q035", "question": "What is the population of Jupiter's largest city?", "category": "unanswerable", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q036", "question": "Who won the 1998 football world cup final?", "category": "unanswerable", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q037", "question": "What medication should I take for a headache?", "category": "unanswerable", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q038", "question": "What is the airspeed velocity of an unladen swallow?", "category": "unanswerable", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+
+    {"id": "q039", "question": "Does the reciprocal rank fusion dentist recommend flossing?", "category": "misleading_overlap", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q040", "question": "What color is the pgvector postgres logo mug on my desk?", "category": "misleading_overlap", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q041", "question": "Is the BM25 bus route running on Sunday?", "category": "misleading_overlap", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q042", "question": "Which embedding necklace matches a blue dress?", "category": "misleading_overlap", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+
+    {"id": "q043", "question": "Prove that BM25 always outperforms dense retrieval on every query.", "category": "unsupported_probe", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q044", "question": "State the exact nDCG score RAGBench achieves in production.", "category": "unsupported_probe", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+    {"id": "q045", "question": "Confirm that pgvector guarantees 100% recall with HNSW.", "category": "unsupported_probe", "answerable": false, "relevant_doc_keys": [], "expected_abstention": true},
+
+    {"id": "q046", "question": "What similarity measure do embeddings use?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["embeddings"], "expected_abstention": false},
+    {"id": "q047", "question": "Why must vectors from different embedding models not be mixed?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["embeddings"], "expected_abstention": false},
+    {"id": "q048", "question": "What is discounted cumulative gain?", "category": "paraphrase", "answerable": true, "relevant_doc_keys": ["ndcg"], "expected_abstention": false},
+    {"id": "q049", "question": "Why are retrieved passages treated as untrusted?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["prompt_injection"], "expected_abstention": false},
+    {"id": "q050", "question": "What does a router do when it is uncertain about a query?", "category": "direct_fact", "answerable": true, "relevant_doc_keys": ["adaptive_routing"], "expected_abstention": false}
+  ]
+}

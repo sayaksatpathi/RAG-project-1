@@ -11,7 +11,7 @@ venv/
 *.db
 *.sqlite3
 data/*.db
-evaluation/reports/*.json
+evaluation/reports/*
 !evaluation/reports/.gitkeep
 
 # Secrets
