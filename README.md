@@ -17,10 +17,13 @@ configurations against a known-good baseline.
 > of RAG compared with strong fixed retrieval baselines while maintaining
 > acceptable evidence support and answer correctness?
 
-This is treated as a hypothesis to test fairly, not a foregone conclusion. See
-[docs/research.md](docs/research.md) (planned) and `NEXT_STEPS.md`.
+This is treated as a hypothesis to test fairly, not a foregone conclusion. The
+headline result is **neutral** — adaptive routing ties the strongest fixed
+baseline on this corpus, reported honestly. See the full
+[research report](docs/research-report.md) and the working
+[docs/research.md](docs/research.md).
 
-## What is implemented and verified (2026-10-15)
+## What is implemented and verified (2026-10-27)
 
 - **Ingestion**: TXT/MD parsing with normalization, content-hash dedup,
   versioned word-window chunking with stable chunk IDs. (PDF supported only if
@@ -34,9 +37,14 @@ This is treated as a hypothesis to test fairly, not a foregone conclusion. See
 - **Citations & abstention**: citation identifier validation against retrieved
   passages and index version; strategy-independent evidence-based abstention.
 - **API**: FastAPI with health/live, health/ready, query, document CRUD
-  (token-protected writes), pagination, bounded uploads, and metrics summary.
-- **CLI**: `ingest`, `query`, `stats`.
-- **Tests**: 24 unit + integration tests passing; ruff clean.
+  (token-protected writes), pagination, and metrics summary. **Hardened**:
+  constant-time bearer check, security headers on every response, per-client
+  rate limiting, a request-body ceiling, path-traversal-safe filenames, an
+  upload content-type allowlist and streaming size cap, optional CORS, and a
+  consistent error envelope that never leaks internals.
+- **CLI**: `ingest`, `query`, `stats`, `evaluate`, `gate-demo`, `failure-demo`,
+  `loadtest`, `runs`, `version`.
+- **Tests**: 90 unit + integration tests passing; ruff clean.
 
 ## Architecture
 

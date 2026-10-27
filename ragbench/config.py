@@ -40,6 +40,15 @@ class Config:
 
     api_token: str = _get("RAGBENCH_API_TOKEN", "dev-local-token")
 
+    # API hardening. CORS is off unless origins are configured; the rate limit
+    # is per-process (see ragbench/api/security.py); the body ceiling guards the
+    # JSON endpoints (multipart uploads are additionally capped as they stream).
+    cors_origins: tuple[str, ...] = tuple(
+        o.strip() for o in _get("RAGBENCH_CORS_ORIGINS", "").split(",") if o.strip()
+    )
+    rate_limit_per_min: int = int(_get("RAGBENCH_RATE_LIMIT_PER_MIN", "120"))
+    max_request_bytes: int = int(_get("RAGBENCH_MAX_REQUEST_BYTES", str(10 * 1024 * 1024)))
+
     @property
     def index_version(self) -> str:
         """Identifier that changes when embedding/chunk config changes.

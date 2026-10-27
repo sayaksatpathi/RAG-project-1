@@ -4,9 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ragbench"
-version = "0.1.0"
+version = "0.13.0"
 description = "Adaptive Retrieval-Augmented Generation platform and evaluation harness"
 requires-python = ">=3.11"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Sayak Satpathi", email = "sayaksatpathi12@gmail.com" }]
+keywords = [
+    "rag", "retrieval-augmented-generation", "information-retrieval",
+    "evaluation", "bm25", "fastapi",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Indexing",
+]
 dependencies = [
     "fastapi>=0.110",
     "pydantic>=2.6",
@@ -15,6 +32,11 @@ dependencies = [
     "python-multipart>=0.0.9",
     "prometheus-client>=0.20",
 ]
+
+[project.urls]
+Homepage = "https://github.com/sayaksatpathi/RAGBench"
+Repository = "https://github.com/sayaksatpathi/RAGBench"
+Issues = "https://github.com/sayaksatpathi/RAGBench/issues"
 
 [project.optional-dependencies]
 # Heavy / optional capabilities. The core offline path does NOT require these.

@@ -2,7 +2,7 @@
 
 Status legend: NOT STARTED · IN PROGRESS · VERIFIED · BLOCKED · DEFERRED
 
-Last updated: 2026-10-15
+Last updated: 2026-10-27
 
 ## Environment audit (VERIFIED)
 
@@ -31,18 +31,18 @@ Last updated: 2026-10-15
 | 3 | Adaptive routing experiment | VERIFIED (B4 router, ablation, 45 tests; H1 neutral result recorded) |
 | 4 | Evidence controls & evaluation gate | VERIFIED (gate policy, regression demo FAIL/PASS, calibration; 53 tests) |
 | 5 | Data/model/config traceability | VERIFIED (index-mismatch rejection, reindex, run registry; 63 tests) |
-| 6 | API & app hardening | NOT STARTED |
+| 6 | API & app hardening | VERIFIED (constant-time token, security headers, rate limit, body-size guard, filename sanitization, 415/413 upload guards, CORS, 500 envelope; 16 tests) |
 | 7 | Observability & dashboard | PARTIAL — logging/metrics/`/metrics` VERIFIED (59 tests); Grafana + Streamlit authored, live render NOT VERIFIED |
 | 8 | Docker & CI/CD | PARTIAL — CI offline steps + gate-demo VERIFIED locally; Docker build/compose authored, NOT VERIFIED (no Docker); hosted CI run NOT VERIFIED (no remote) |
 | 9 | Kubernetes & Helm | AUTHORED, NOT VERIFIED — manifests + Helm chart (probes, resources, non-root); YAML/chart metadata validated; no cluster/kubectl/helm |
 | 10 | Terraform & cloud | CONFIG VALIDATED — fmt/init/validate pass; apply NOT RUN (no creds, opt-in) |
 | 11 | Reliability & performance | VERIFIED (5 failure experiments PASS, load harness p50/p95/p99, runbook; 68 tests) |
-| 12 | Research report | NOT STARTED |
-| 13 | Final hardening & packaging | NOT STARTED |
+| 12 | Research report | VERIFIED (docs/research-report.md; numbers reproduced, run `5f421bd6`) |
+| 13 | Final hardening & packaging | VERIFIED (LICENSE, full pyproject metadata, `ragbench version`, CHANGELOG/SECURITY/CONTRIBUTING, Makefile; editable install smoke-tested) |
 
 ## Final acceptance matrix (§24)
 
-Evidence = passing tests (68 total), CLI runs this session, or an explicit status.
+Evidence = passing tests (90 total), CLI runs this session, or an explicit status.
 
 ### A. Functional application
 - [x] Upload/parse supported document — ingestion tests + demo

@@ -221,3 +221,34 @@ and exposure notes.
 **"the configuration is valid."** `plan`/`apply` NOT RUN — no AWS credentials and
 apply would create billable resources (not authorized). `.gitignore` updated to
 exclude `.terraform/`, state, and tfvars (lock file kept).
+
+## 2026-10-27 — Phases 6, 12, 13 (API hardening, research report, packaging)
+
+**Phase 6 — API & app hardening.** Added `ragbench/api/security.py`
+(`safe_filename` path-traversal defense, constant-time `token_matches` via
+`hmac.compare_digest`, a thread-safe per-client `FixedWindowRateLimiter`, and the
+security-header set). Wired into `ragbench/api/app.py`: security headers on every
+response (incl. errors), a Content-Length body-size guard (413), per-client rate
+limiting that exempts probes/metrics (429 + `Retry-After`), an upload
+content-type allowlist (415), a streaming upload size cap (413), optional CORS,
+and an `Exception` handler returning `{error, request_id}` without leaking
+internals. New config: `cors_origins`, `rate_limit_per_min`, `max_request_bytes`.
+New metrics: `auth_failures_total`, `requests_rejected_total`. **16 new tests**
+in `tests/integration/test_api_security.py`.
+
+**Phase 12 — research report.** `docs/research-report.md`: a self-contained
+capstone (abstract, question/hypotheses, method, measured v1.1 results,
+ablations, abstention analysis, reliability/load, threats, reproducibility,
+conclusions). Numbers **reproduced** via a fresh `ragbench evaluate` — run
+`5f421bd6`, git `62244a6`, identical to the recorded v1.1 run `879ec810`; the
+neutral H1 result holds.
+
+**Phase 13 — final hardening & packaging.** `LICENSE` (MIT); full
+`pyproject.toml` metadata (authors, license, readme, classifiers, URLs,
+keywords); version bumped to `0.13.0` (the API advertises it); `ragbench version`
+/ `--version`; `CHANGELOG.md`, `SECURITY.md`, `CONTRIBUTING.md`; extra Makefile
+targets (`format`, `security`, `report`, `version`, `clean`). Editable install
+(`pip install -e .`) smoke-tested; `.env.example` documents the new settings.
+
+**Validation:** **90 tests pass**; ruff clean. The offline-first ethos and honest
+NOT-VERIFIED labels for the runtime-gated deployment pieces are unchanged.

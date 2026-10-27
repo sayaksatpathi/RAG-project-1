@@ -48,6 +48,14 @@ class Metrics:
             "ragbench_indexed_documents", "Documents currently indexed",
             registry=self.registry,
         )
+        self.auth_failures_total = Counter(
+            "ragbench_auth_failures_total", "Authentication failures on protected endpoints",
+            registry=self.registry,
+        )
+        self.requests_rejected_total = Counter(
+            "ragbench_requests_rejected_total", "Requests rejected before handling",
+            ["reason"], registry=self.registry,
+        )
 
     def observe_request(self, method: str, route: str, status: int, latency_s: float) -> None:
         self.requests_total.labels(method=method, route=route, status=str(status)).inc()

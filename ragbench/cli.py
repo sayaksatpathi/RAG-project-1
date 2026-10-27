@@ -13,6 +13,7 @@ import json
 import sys
 from pathlib import Path
 
+from ragbench import __version__
 from ragbench.ingestion.parsing import SUPPORTED_SUFFIXES
 from ragbench.pipeline import Pipeline
 
@@ -53,8 +54,17 @@ def _query(pipeline: Pipeline, question: str, strategy: str) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    args_in = sys.argv[1:] if argv is None else list(argv)
+    # Report the version without requiring a subcommand (argparse's required
+    # subparser would otherwise reject a bare `--version`).
+    if args_in and args_in[0] in ("--version", "-V", "version"):
+        print(f"ragbench {__version__}")
+        return 0
+
     parser = argparse.ArgumentParser(prog="ragbench")
+    parser.add_argument("--version", "-V", action="version", version=f"ragbench {__version__}")
     sub = parser.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("version", help="print the RAGBench version and exit")
     pi = sub.add_parser("ingest")
     pi.add_argument("path")
     pq = sub.add_parser("query")
