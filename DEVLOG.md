@@ -252,3 +252,48 @@ targets (`format`, `security`, `report`, `version`, `clean`). Editable install
 
 **Validation:** **90 tests pass**; ruff clean. The offline-first ethos and honest
 NOT-VERIFIED labels for the runtime-gated deployment pieces are unchanged.
+
+## 2026-10-28 — Docker runtime VERIFIED
+
+Docker became available (WSL Docker 29.1.3 + Compose 2.40). Verified the
+previously-authored container path for real: `docker build` produces
+`ragbench:local`; `docker compose config` is valid; running the image serves
+`/health/ready`=200, `/health/live`, `POST /api/v1/query` (grounded/abstain
+path), upload auth (401 without token → 200 with), the Phase 6 security headers
+on every response, and `/metrics`; the image runs as non-root (`appuser`,
+uid 10001). Phase 8 Docker flips PARTIAL → VERIFIED in IMPLEMENTATION_STATUS.md.
+
+Still NOT VERIFIED (next session): Kubernetes/Helm live apply (kind 0.33 is
+present but kubectl/helm are not installed), Terraform re-validate, and live
+Grafana/Prometheus/Streamlit render. The user's other running containers
+(Jenkins, E2B sandbox, an existing kind cluster, Grafana/Prometheus) occupy
+ports 8000/8001/3000/9090, so the smoke test used host port 8010 and a dedicated
+container, touching none of them.
+
+## 2026-10-29 — Kubernetes/Helm, CI, Terraform, Prometheus/Grafana VERIFIED
+
+Cleared the remaining runtime-gated items where tooling exists:
+
+- **Kubernetes & Helm (Phase 9) → VERIFIED** on a throwaway `kind` cluster
+  (`ragbench`, separate from the existing `opsforge` cluster; kubectl v1.35.9 +
+  helm v4.3.1 installed to WSL user-space, kind v0.33). Loaded `ragbench:local`,
+  applied the raw manifests → Deployment rolled out, pod 1/1 Running,
+  /health/ready=200, query works, upload auth 401 — exercising the liveness/
+  readiness/startup probes, non-root + readOnlyRootFilesystem security context,
+  PVC bind, and ConfigMap/Secret wiring. `helm lint` clean; `helm install` →
+  deployed, pod Running, /health/ready=200. Everything torn down; the cluster
+  was deleted.
+- **Hosted CI (Phase 8) → VERIFIED.** GitHub Actions `CI` workflow ran on the
+  Phase-6/12/13 push (run 40506328588) and completed **success** in 52s.
+- **Terraform (Phase 10)** re-confirmed: `fmt -check`, `init -backend=false`,
+  `validate` all pass (Terraform 1.16.5). `apply` still NOT RUN — it creates
+  billable AWS resources and is not authorized.
+- **Prometheus config** passes `promtool check config` (via the official
+  prom/prometheus:v2.51.2 image); **Grafana dashboard** is valid JSON (6 panels
+  referencing real `ragbench_*` metrics); the Streamlit dashboard compiles.
+
+Still NOT VERIFIED (genuinely gated, not incomplete): live Grafana/Streamlit
+*render* (needs a wired datasource/instance), `terraform apply` (billable AWS),
+and a real embedding-provider re-run (sentence-transformers — multi-GB download).
+No app/source code changed in this pass; the deployment artifacts were already
+correct and now carry real run evidence.

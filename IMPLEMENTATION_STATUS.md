@@ -2,7 +2,7 @@
 
 Status legend: NOT STARTED · IN PROGRESS · VERIFIED · BLOCKED · DEFERRED
 
-Last updated: 2026-10-27
+Last updated: 2026-10-29
 
 ## Environment audit (VERIFIED)
 
@@ -32,10 +32,10 @@ Last updated: 2026-10-27
 | 4 | Evidence controls & evaluation gate | VERIFIED (gate policy, regression demo FAIL/PASS, calibration; 53 tests) |
 | 5 | Data/model/config traceability | VERIFIED (index-mismatch rejection, reindex, run registry; 63 tests) |
 | 6 | API & app hardening | VERIFIED (constant-time token, security headers, rate limit, body-size guard, filename sanitization, 415/413 upload guards, CORS, 500 envelope; 16 tests) |
-| 7 | Observability & dashboard | PARTIAL — logging/metrics/`/metrics` VERIFIED (59 tests); Grafana + Streamlit authored, live render NOT VERIFIED |
-| 8 | Docker & CI/CD | PARTIAL — CI offline steps + gate-demo VERIFIED locally; Docker build/compose authored, NOT VERIFIED (no Docker); hosted CI run NOT VERIFIED (no remote) |
-| 9 | Kubernetes & Helm | AUTHORED, NOT VERIFIED — manifests + Helm chart (probes, resources, non-root); YAML/chart metadata validated; no cluster/kubectl/helm |
-| 10 | Terraform & cloud | CONFIG VALIDATED — fmt/init/validate pass; apply NOT RUN (no creds, opt-in) |
+| 7 | Observability & dashboard | logging/metrics/`/metrics` VERIFIED (59 tests); Prometheus config **promtool-valid** and Grafana dashboard **JSON-valid** (6 panels, real `ragbench_*` metrics) 2026-10-29; Streamlit app compiles; live Grafana/Streamlit render still NOT VERIFIED (no datasource/instance wired) |
+| 8 | Docker & CI/CD | Docker **VERIFIED** 2026-10-28 (image `ragbench:local` builds; container serves /health/ready=200, /query, upload auth 401→200, security headers, /metrics; non-root; compose config valid — WSL Docker 29.1.3). CI offline steps + gate-demo VERIFIED locally; **hosted GitHub Actions CI VERIFIED** (run 40506328588, success, 2026-10-27) |
+| 9 | Kubernetes & Helm | **VERIFIED** 2026-10-29 on a real `kind` cluster: raw manifests applied → pod 1/1 Running, /health/ready=200, query + auth 401 (probes, non-root, readOnlyRootFS, PVC bind, ConfigMap/Secret all exercised); `helm lint` clean, `helm install` → deployed & Running & 200; cleanly torn down (kubectl v1.35.9, helm v4.3.1, kind v0.33) |
+| 10 | Terraform & cloud | CONFIG VALIDATED — fmt/init/validate pass (re-confirmed 2026-10-29, Terraform 1.16.5); apply NOT RUN (no creds, billable, opt-in) |
 | 11 | Reliability & performance | VERIFIED (5 failure experiments PASS, load harness p50/p95/p99, runbook; 68 tests) |
 | 12 | Research report | VERIFIED (docs/research-report.md; numbers reproduced, run `5f421bd6`) |
 | 13 | Final hardening & packaging | VERIFIED (LICENSE, full pyproject metadata, `ragbench version`, CHANGELOG/SECURITY/CONTRIBUTING, Makefile; editable install smoke-tested) |
@@ -85,13 +85,13 @@ Evidence = passing tests (90 total), CLI runs this session, or an explicit statu
 
 ### E. DevOps and operations
 - [x] Local dev reproducible — README, demo script
-- [ ] Docker build/compose — authored; **NOT VERIFIED** (no Docker)
-- [x] CI covers core tests + quality gate — `.github/workflows/ci.yml` (hosted run NOT VERIFIED)
+- [x] Docker build/compose — **VERIFIED** 2026-10-28: image builds, container serves endpoints with auth + security headers, compose config valid (WSL Docker 29.1.3)
+- [x] CI covers core tests + quality gate — `.github/workflows/ci.yml`; **hosted run VERIFIED** (GitHub Actions run 40506328588, success)
 - [x] Health checks behave as documented — health endpoint tests
 - [x] Telemetry real or honest empty states — `/metrics` test, dashboard empty states
 - [x] Controlled failure tested — `failure-demo` (5/5 PASS)
 - [x] Recovery/rollback tested where applicable — DB reconnect, reindex recovery
-- [ ] Kubernetes/Helm — authored, YAML-validated; **NOT VERIFIED** (no cluster)
+- [x] Kubernetes/Helm — **VERIFIED** 2026-10-29 on a real kind cluster (raw manifests + Helm install both roll out and serve; then torn down)
 - [~] Terraform — fmt/init/validate **VERIFIED**; apply NOT RUN (no creds)
 
 ### F. Portfolio readiness

@@ -103,10 +103,13 @@ vectors.
 
 ## Optional / not verified in this environment
 
-Docker, Kubernetes/Helm, Terraform/cloud, Postgres/pgvector, sentence-transformers,
-and OpenAI-compatible generation are config-gated and documented but **not
-runtime-verified here** (no Docker/Postgres/kubectl/credentials). They are marked
-accordingly in `IMPLEMENTATION_STATUS.md`.
+Docker (build + compose + container serving), Kubernetes manifests, and the Helm
+chart are **runtime-verified** (Docker on WSL and a local `kind` cluster), and the
+hosted GitHub Actions CI run is green; Terraform is `fmt`/`init`/`validate`-clean
+(apply not run — billable). Postgres/pgvector, sentence-transformers, OpenAI
+generation, `terraform apply`, and live Grafana/Streamlit *render* remain
+config-gated / environment-gated and are marked accordingly in
+`IMPLEMENTATION_STATUS.md`.
 
 ## Limitations
 

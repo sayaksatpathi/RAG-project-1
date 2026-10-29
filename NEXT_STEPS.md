@@ -7,13 +7,18 @@
   (LICENSE, pyproject metadata, `ragbench version`, CHANGELOG/SECURITY/
   CONTRIBUTING, Makefile targets). 90 tests pass; ruff clean.
 
-## Immediately executable (all remaining items are runtime-gated)
-1. **Verify where a runtime exists:** Docker build + `compose up`; GitHub Actions
-   run; `helm lint`/`kubectl apply` on a local cluster; `terraform plan`/`apply`
-   with real AWS creds; live Grafana/Streamlit; real embedding provider re-run.
-2. **Research deepening:** real embedding provider re-run of the identical
-   harness; paired significance testing + confidence intervals; abstention
-   threshold calibration on a held-out split.
+## Runtime verification done (2026-10-29)
+- Docker build + container serving; Kubernetes manifests + Helm chart on a real
+  `kind` cluster; hosted GitHub Actions CI (green); Terraform fmt/init/validate;
+  Prometheus promtool + Grafana dashboard JSON. See IMPLEMENTATION_STATUS.md.
+
+## Still gated (not incomplete — needs a resource this machine lacks)
+1. `terraform apply` with real AWS credentials (creates billable resources).
+2. Live Grafana/Streamlit **render** against a wired datasource/instance.
+3. Postgres/pgvector backend against a real server.
+4. **Research deepening:** real embedding provider (sentence-transformers)
+   re-run of the identical harness; paired significance testing + confidence
+   intervals; abstention threshold calibration on a held-out split.
 
 ## Done since last checkpoint
 - Phases 1–5, 7–11 covered. 1–5 & 11 VERIFIED; 10 config-validated (fmt/init/
